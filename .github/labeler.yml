@@ -1,0 +1,20 @@
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+
+feature:
+ - head-branch: ['^feature', 'feature']
+
+release:
+  - all:
+    - base-branch: 'master'
+    - head-branch: ['^release', 'release']
+
+docker:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.docker/**/*'
+    - '.dockerignore'
+    - 'web.Dockerfile'
+    - 'compose.build.yml'
+    - 'compose.vm.yml.dist'
