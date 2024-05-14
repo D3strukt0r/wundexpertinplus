@@ -1,0 +1,10 @@
+services:
+  web:
+    build:
+      dockerfile: web.Dockerfile
+      ssh:
+        - default
+      target: prod
+      platforms:
+        - linux/amd64
+        #- linux/arm64
