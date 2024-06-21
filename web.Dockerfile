@@ -97,7 +97,8 @@ RUN \
     && chown --recursive root:root /usr/local/src/app \
     && chown www-data:www-data \
         /usr/local/src/app/wp-content \
-        /usr/local/src/app/wp-content/cache
+        /usr/local/src/app/wp-content/cache \
+        /var/www
 
 COPY web/.docker/phpfpm/rootfs-prod /
 
