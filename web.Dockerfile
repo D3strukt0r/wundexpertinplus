@@ -59,6 +59,7 @@ RUN \
         https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck \
     && { \
+        echo '[www]'; \
         echo 'pm.status_path = /status'; \
     } >>"$PHP_INI_DIR/conf.d/zz-docker.conf" \
     \
