@@ -1,0 +1,106 @@
+services:
+  web-phpfpm:
+    build:
+      dockerfile: web.Dockerfile
+      ssh:
+        - default
+      target: prod-phpfpm
+    container_name: phpfpm
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: db
+      WORDPRESS_DB_PASSWORD: db
+      WORDPRESS_DB_NAME: db
+    depends_on:
+      - db
+
+  web-nginx:
+    build:
+      dockerfile: web.Dockerfile
+      ssh:
+        - default
+      target: prod-nginx
+    container_name: nginx
+    environment:
+      UPSTREAM_SERVER: web-phpfpm:9000
+    depends_on:
+      - traefik
+      - web-phpfpm
+    labels:
+      traefik.enable: true
+      traefik.http.routers.web-nginx.entrypoints: websecure
+      traefik.http.routers.web-nginx.rule: Host(`wundexpertinplus.test`)
+      traefik.http.routers.web-nginx.tls: true
+
+  traefik:
+    image: traefik
+    init: true
+    command:
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic_conf
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./.docker/certs:/etc/ssl/certs/local:ro
+      - ./.docker/rootfs-local/traefik/etc/traefik/dynamic_conf/conf.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.entrypoints: websecure
+      traefik.http.routers.traefik.rule: Host(`traefik.wundexpertinplus.test`)
+      traefik.http.routers.traefik.tls: true
+      traefik.http.routers.traefik.service: api@internal
+
+  db:
+    image: mariadb
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=db"]
+    init: true
+    container_name: db
+    volumes:
+      - ./.docker/rootfs-local/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ~/data/db:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_USER: db
+      MARIADB_PASSWORD: db
+      MARIADB_DATABASE: db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    init: true
+    environment:
+      PMA_HOST: db
+      PMA_USER: db
+      PMA_PASSWORD: db
+      UPLOAD_LIMIT: 100M
+    depends_on:
+      - db
+    labels:
+      traefik.enable: true
+      traefik.http.routers.phpmyadmin.entrypoints: websecure
+      traefik.http.routers.phpmyadmin.rule: Host(`phpmyadmin.wundexpertinplus.test`)
+      traefik.http.routers.phpmyadmin.tls: true
+
+  mailpit:
+    image: axllent/mailpit
+    init: true
+    labels:
+      traefik.enable: true
+      traefik.http.services.mailpit.loadbalancer.server.port: 8025
+      traefik.http.routers.mailpit.entrypoints: websecure
+      traefik.http.routers.mailpit.rule: Host(`mailpit.wundexpertinplus.test`)
+      traefik.http.routers.mailpit.tls: true

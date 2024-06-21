@@ -1,0 +1,16 @@
+# https://stackoverflow.com/a/51429852/4156752
+# Ignore everything
+*
+
+# Allow files and directories
+!/.docker/rootfs
+
+!/web/.docker/phpfpm/rootfs-prod
+!/web/.docker/nginx/rootfs-prod
+
+# Ignore unnecessary files inside allowed directories
+# This should go after the allowed directories
+**/*~
+**/*.log
+**/.DS_Store
+**/Thumbs.db
