@@ -37,6 +37,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         htop \
         # Required for WP CLI
         less \
+        # Required for unpacking wordpress.org plugins/themes
+        unzip \
         # Required to check connectivity
         default-mysql-client \
         postgresql-client \
@@ -193,8 +195,31 @@ CMD ["nginx", "-g", "daemon off;"]
 # -----------------------------------------------------------------------------
 FROM phpfpm AS prod-phpfpm
 USER root
+RUN \
+    rm --recursive --force \
+        ./wp-content/themes/twentytwentyfour \
+    && wp-plugin-install.sh \
+        bulk-delete \
+        duplicator \
+        google-analytics-for-wordpress \
+        jetpack \
+        loginizer \
+        polylang \
+        wordpress-importer \
+        wordpress-seo \
+        wp-mail-smtp \
+        wpforms-lite \
+    && wp-theme-install.sh \
+        customify \
+    \
+    # Fix Permission
+    && chown --recursive www-data:www-data . \
+    && find . -type d -exec chmod 755 {} \; \
+    && find . -type f -exec chmod 644 {} \;
 USER www-data
 
 FROM nginx AS prod-nginx
 USER root
+RUN \
+    find . -type f -name "*.php" -exec sh -c 'i="$1"; >"$i"' _ {} \;
 USER nginx

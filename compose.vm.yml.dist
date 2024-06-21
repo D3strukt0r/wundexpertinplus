@@ -13,6 +13,7 @@ services:
       WORDPRESS_DB_NAME: db
     depends_on:
       - db
+
   web-nginx:
     build:
       dockerfile: web.Dockerfile
