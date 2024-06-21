@@ -220,6 +220,7 @@ USER www-data
 
 FROM nginx AS prod-nginx
 USER root
+COPY --from=prod-phpfpm /usr/local/src/app/ ./
 RUN \
     find . -type f -name "*.php" -exec sh -c 'i="$1"; >"$i"' _ {} \;
 USER nginx
