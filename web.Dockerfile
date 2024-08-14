@@ -77,6 +77,12 @@ RUN \
         echo 'export PS1="🐳 ${debian_chroot:+($debian_chroot)}\[\e[38;5;46m\]\u@\h\[\e[0m\]:\[\e[38;5;33m\]\w\[\e[0m\]\\$ "'; \
     } >>/etc/bash.bashrc \
     \
+    # Set upload limit
+    && { \
+		echo 'post_max_size = 100M'; \
+		echo 'upload_max_filesize = 100M'; \
+	} >"$PHP_INI_DIR/conf.d/upload-limit.ini" \
+    \
     # Fix weird WordPress setup
     && { \
 		echo 'cgi.fix_pathinfo = 0'; \
