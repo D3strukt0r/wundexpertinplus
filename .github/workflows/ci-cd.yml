@@ -62,14 +62,14 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata (Web-PHPFPM)
         id: meta-web-phpfpm
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ vars.IMAGE_NAME }}
           flavor: |
             prefix=phpfpm-,onlatest=true
       - name: Extract Docker metadata (Web-Nginx)
         id: meta-web-nginx
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ vars.IMAGE_NAME }}
           flavor: |
