@@ -1,0 +1,147 @@
+// Design tokens — palette + type.
+// Light is default; `body.dark` flips the runtime variables. Component rules
+// consume the variables only — never the raw colour literals.
+//
+// Colours expressed in `oklch()` for perceptual uniformity (the design
+// handoff supplied hex; values here converted via culori one-off so dev/dark
+// shades stay computable and the gamut on capable displays is wider). The
+// `--green-fixed` / `--paper-fixed` pair is intentionally NOT themed: the
+// Kontakt section stays dark-green-with-cream type in both modes so the
+// cream-on-green CTAs inside keep their identity.
+//
+// On the `--color-X: var(--X)` alias lines: Tailwind v4's `@theme` block in
+// tailwind.css declares `--color-paper: var(--paper)` only at `:root` scope.
+// CSS custom-property values are *computed at the declaring element*, so
+// without redeclaring `--color-paper` at every theme scope, `var(--paper)`
+// would always resolve at `:root` (= light) regardless of any descendant
+// override. We redeclare each alias inside `body.dark` (and the no-JS
+// `prefers-color-scheme` fallback) so the `var()` re-resolves there.
+
+:root {
+  --bg:           oklch(95.4% 0.013 82.4deg);
+  --bg-deep:      oklch(91.6% 0.024 82.1deg);
+  --paper:        oklch(97.7% 0.011 84.6deg);
+  --ink:          oklch(25.1% 0.014 163.6deg);
+  --ink-soft:     oklch(39.5% 0.021 158.3deg);
+  --green:        oklch(38.2% 0.041 166.3deg);
+  --green-soft:   oklch(46.8% 0.048 166.3deg);
+  --tan:          oklch(78.9% 0.036 78.6deg);
+  --tan-deep:     oklch(67.5% 0.046 73.9deg);
+  --line:         oklch(25.1% 0.014 163.6deg / 0.14);
+  --header-bg:    oklch(95.4% 0.013 82.4deg / 0.86);
+  --map-bg:       oklch(95.4% 0.013 82.4deg);
+  --shadow-soft:  oklch(25.1% 0.014 163.6deg / 0.35);
+
+  // Fixed tokens are only the ones the Kontakt SECTION needs to stay
+  // cream-on-green in both themes. The praxis card sitting inside the
+  // section is themed normally — paper in light, dark-paper in dark.
+  --green-fixed:    oklch(38.2% 0.041 166.3deg);
+  --paper-fixed:    oklch(97.7% 0.011 84.6deg);
+  --tan-fixed:      oklch(78.9% 0.036 78.6deg);
+
+  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --sans:  'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  // Foreground colour for elements painted on `--green` (CTAs, nav phone pill).
+  // The swap keeps contrast on the green-becomes-sage flip in dark mode.
+  --on-primary: var(--paper);
+
+  // Image filter for the portrait. Dark mode dims a touch and pulls down
+  // saturation so the portrait doesn't read as a bright slab against the
+  // deep canvas background.
+  --portrait-filter: saturate(0.92) contrast(1.02);
+  --ueber-portrait-filter: saturate(0.85) contrast(1.02);
+
+  // Inline dot on the phone-CTA pill. Warm tan against dark green; flips to
+  // the dark canvas in dark mode where the pill turns light sage.
+  --cta-dot-bg: var(--tan);
+
+  color-scheme: light;
+}
+
+body.dark {
+  --bg:           oklch(23.0% 0.020 167.0deg);
+  --paper:        oklch(27.8% 0.023 162.7deg);
+  --ink:          oklch(92.3% 0.021 85.9deg);
+  --ink-soft:     oklch(74.8% 0.022 88.8deg);
+  --green:        oklch(79.5% 0.038 160.4deg);
+  --green-soft:   oklch(70.2% 0.044 160.4deg);
+  --tan:          oklch(78.9% 0.036 78.6deg);
+  --tan-deep:     oklch(81.4% 0.049 78.3deg);
+  --line:         oklch(92.3% 0.021 85.9deg / 0.16);
+  --header-bg:    oklch(23.0% 0.020 167.0deg / 0.88);
+  --map-bg:       oklch(25.2% 0.018 165.4deg);
+  --shadow-soft:  oklch(0% 0 0deg / 0.5);
+  --bg-deep:      oklch(25.5% 0.020 162.9deg);
+
+  --on-primary: var(--bg);
+  --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);
+  --ueber-portrait-filter: saturate(0.72) contrast(0.96) brightness(0.88);
+  --cta-dot-bg: var(--bg);
+
+  // Redeclare the Tailwind `--color-*` aliases at this scope so their
+  // var(--*) right-hand-side resolves to the dark values, not the :root
+  // light values.
+  --color-bg:         var(--bg);
+  --color-bg-deep:    var(--bg-deep);
+  --color-paper:      var(--paper);
+  --color-ink:        var(--ink);
+  --color-ink-soft:   var(--ink-soft);
+  --color-green:      var(--green);
+  --color-green-soft: var(--green-soft);
+  --color-tan:        var(--tan);
+  --color-tan-deep:   var(--tan-deep);
+  --color-line:       var(--line);
+  --color-header:     var(--header-bg);
+  --color-map:        var(--map-bg);
+  --color-shadow:     var(--shadow-soft);
+  --color-on-primary: var(--on-primary);
+  --color-cta-dot:    var(--cta-dot-bg);
+
+  color-scheme: dark;
+}
+
+// No-JS fallback: the themeBootstrap script never runs, so body has neither
+// `.light` nor `.dark`. Honour the OS's prefers-color-scheme by applying the
+// dark overrides under that media query as long as the user hasn't explicitly
+// chosen light (which they can't without JS, so this is always when no JS).
+@media (prefers-color-scheme: dark) {
+  body:not(.light):not(.dark) {
+    --bg:           oklch(23.0% 0.020 167.0deg);
+    --paper:        oklch(27.8% 0.023 162.7deg);
+    --ink:          oklch(92.3% 0.021 85.9deg);
+    --ink-soft:     oklch(74.8% 0.022 88.8deg);
+    --green:        oklch(79.5% 0.038 160.4deg);
+    --green-soft:   oklch(70.2% 0.044 160.4deg);
+    --tan:          oklch(78.9% 0.036 78.6deg);
+    --tan-deep:     oklch(81.4% 0.049 78.3deg);
+    --line:         oklch(92.3% 0.021 85.9deg / 0.16);
+    --header-bg:    oklch(23.0% 0.020 167.0deg / 0.88);
+    --map-bg:       oklch(25.2% 0.018 165.4deg);
+    --shadow-soft:  oklch(0% 0 0deg / 0.5);
+    --bg-deep:      oklch(25.5% 0.020 162.9deg);
+
+    --on-primary: var(--bg);
+    --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);
+    --ueber-portrait-filter: saturate(0.72) contrast(0.96) brightness(0.88);
+    --cta-dot-bg: var(--bg);
+
+    --color-bg:         var(--bg);
+    --color-bg-deep:    var(--bg-deep);
+    --color-paper:      var(--paper);
+    --color-ink:        var(--ink);
+    --color-ink-soft:   var(--ink-soft);
+    --color-green:      var(--green);
+    --color-green-soft: var(--green-soft);
+    --color-tan:        var(--tan);
+    --color-tan-deep:   var(--tan-deep);
+    --color-line:       var(--line);
+    --color-header:     var(--header-bg);
+    --color-map:        var(--map-bg);
+    --color-shadow:     var(--shadow-soft);
+    --color-on-primary: var(--on-primary);
+    --color-cta-dot:    var(--cta-dot-bg);
+
+    color-scheme: dark;
+  }
+}

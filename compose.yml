@@ -1,0 +1,35 @@
+services:
+  dev:
+    image: nixos/nix
+    working_dir: /opt/wundexpertinplus
+    command:
+      - nix
+      - --extra-experimental-features
+      - nix-command flakes
+      - develop
+      - --command
+      - sh
+      - -c
+      - pnpm install && pnpm run dev --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    volumes:
+      # Inside a devcontainer running with Docker-outside-of-Docker, the host
+      # daemon needs the *host* path of the workspace, not the devcontainer's
+      # internal /workspaces/... view. The devcontainer.json populates
+      # LOCAL_WORKSPACE_FOLDER from ${localWorkspaceFolder}; for plain host
+      # docker compose use it falls back to '.'.
+      - "${LOCAL_WORKSPACE_FOLDER:-.}:/opt/wundexpertinplus"
+      - node_modules:/opt/wundexpertinplus/node_modules
+      # Persist the nix store across container restarts so devShell realisation
+      # only happens once.
+      - nix-store:/nix
+    environment:
+      NODE_ENV: development
+      # Lets pnpm purge node_modules non-interactively when the persisted
+      # volume's layout disagrees with the current lockfile (no TTY here).
+      CI: "true"
+
+volumes:
+  node_modules:
+  nix-store:

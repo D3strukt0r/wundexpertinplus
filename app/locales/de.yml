@@ -1,0 +1,128 @@
+meta:
+  page_title: 'Wund Expertin Plus — Wundbehandlung in Baselland'
+  page_description: 'Sibylle Bürgi-Lütscher · Dipl. Wundexpertin SAfW. Moderne, individuelle Wundversorgung in Liestal und Umgebung. Hausbesuche in den Bezirken Waldenburg und Liestal ohne Aufpreis.'
+
+brand:
+  name: 'Wund Expertin Plus'
+  subtitle: 'Sibylle Bürgi-Lütscher · SAfW'
+  role: 'Dipl. Wundexpertin SAfW'
+  person: 'Sibylle Bürgi-Lütscher'
+  region: 'Baselland · Schweiz'
+
+contact:
+  tel: '079 127 59 89'
+  tel_href: 'tel:+41791275989'
+  email: 'buergi.wundbehandlung@gmail.com'
+  linkedin_url: 'https://www.linkedin.com/in/sibylle-bürgi-lütscher-547101203/'
+  linkedin_label: 'LinkedIn-Profil'
+
+nav:
+  - href: '/#home'
+    label: 'Home'
+  - href: '/#leistungen'
+    label: 'Leistungen'
+  - href: '/#ueber-mich'
+    label: 'Über mich'
+  - href: '/#kontakt'
+    label: 'Kontakt'
+
+hero:
+  eyebrow: 'Wundbehandlung in Baselland'
+  title_part1: 'Wundbehandlung,'
+  title_part2: 'die den'
+  title_emphasis: 'Menschen'
+  title_part3: 'in den Mittelpunkt stellt.'
+  body: 'Moderne Wundversorgung in Baselland — individuell, professionell und ganzheitlich. In enger Zusammenarbeit mit Ihnen, Ihrem Arzt und Ihren Angehörigen.'
+  pull: 'Sie als Klientin und Klient stehen dabei immer im Mittelpunkt.'
+  cta_appointment: 'Termin anfragen'
+  cta_services: 'Leistungen ansehen ↓'
+  portrait_alt: 'Portrait von Sibylle Bürgi-Lütscher'
+  caption_label: 'Leitbild'
+
+leistungen:
+  section_number: '02 — Leistungen'
+  title_part1: 'Lebensqualität'
+  title_emphasis: 'erhalten'
+  title_part2: 'und verbessern.'
+  intro: 'Wunden beeinträchtigen die Lebensqualität. Dies gilt für akute Wunden genauso wie für chronische Wunden. Im Vordergrund der Behandlung steht die Erhaltung und Verbesserung der Lebensqualität.'
+  items:
+    - title: 'Akute Wunden'
+      detail: 'nach Operationen und Verletzungen'
+    - title: 'Chronische Wunden'
+      detail: 'diabetische, venöse, arterielle Wunden'
+    - title: 'Onkologische Wunden'
+      detail: 'Begleitung in sensiblen Phasen'
+    - title: 'Dekubitus'
+      detail: 'Druckstellen vorbeugen und behandeln'
+    - title: 'Pflegerische Leistungen'
+      detail: 'im Rahmen der Wundbehandlung'
+  insurance_label: 'Krankenkasse:'
+  insurance_note: 'Meine Wundbehandlungen und pflegerischen Leistungen werden mit ärztlicher Verordnung von der Krankenkassen-Grundversicherung übernommen. Sie können gerne auch ohne vorgängigen Arztbesuch direkt mit mir Kontakt aufnehmen.'
+
+about:
+  section_number: '03 — Über mich'
+  name_part1: 'Sibylle Bürgi'
+  name_part2: '-Lütscher'
+  role_subtitle: 'Eidgenössisch anerkannte Wundexpertin'
+  portrait_caption: '↳ Portrait, Praxis Liestal'
+  body: 'Seit mehr als 10 Jahren widme ich mich der Behandlung von vielseitigen Wunden als eidgenössisch anerkannte Wundexpertin SAfW. Für eine bestmögliche Behandlung Ihrer Wunden bilde ich mich laufend weiter.'
+  qualification_fallback: 'Zusatzqualifikation'
+  creds:
+    - year: 'seit 2004'
+      title: 'Dipl. Pflegefachfrau HF'
+    - year: 'seit 2010'
+      title: 'Dipl. Wundexpertin SAfW'
+      note: 'Schweizerische Gesellschaft für Wundbehandlung'
+    - title: 'Kinästhetiktutorin'
+      note: 'Beraterin der Lehre der Bewegungsempfindung'
+
+kontakt:
+  section_number: '04 — Kontakt'
+  title_part1: 'Schreiben Sie mir,'
+  title_emphasis: 'rufen Sie an'
+  title_part2: '— ich bin für Sie da.'
+  intro: 'Sie können mich in der rollstuhlgängigen Praxis in Liestal von Sibylle Wyttenbach besuchen. Hausbesuche nach Bedarf ohne Aufpreis in den Bezirken Waldenburg und Liestal. Weitere Gemeinden in den Bezirken Arlesheim und Sissach nach Absprache möglich.'
+  tel_label: 'TELEFON'
+  email_label: 'E-MAIL'
+  linkedin_tile_label: 'LINKEDIN'
+  linkedin_tile_value: 'Sibylle Bürgi-Lütscher'
+  perks:
+    - 'Parkplätze im Haus'
+    - 'Rollstuhlgängig'
+    - 'Hausbesuche ohne Aufpreis'
+  praxis:
+    eyebrow: 'Praxis'
+    partner: 'Praxis in Zusammenarbeit mit Sibylle Wyttenbach'
+    sub: 'Wund- & Stomapflege'
+    address:
+      - 'Bahnhofplatz 12'
+      - '1. Stock, in der Urologie-Praxis'
+      - '4410 Liestal'
+    url: 'https://wundpflege.jimdofree.com/'
+    url_label: 'wundpflege.jimdofree.com'
+    map_label: 'Bahnhofplatz 12 · Liestal'
+    map_pin_label: 'Praxis'
+    map_aria_label: 'Google-Karte der Praxis am Bahnhofplatz 12 in Liestal'
+    map_card_link: 'Auf Google Maps öffnen'
+
+theme:
+  switch_to_dark: 'Dunkelmodus aktivieren'
+  switch_to_light: 'Hellmodus aktivieren'
+
+menu:
+  open: 'Menü öffnen'
+  close: 'Menü schliessen'
+
+footer:
+  copyright_content: 'Inhalt © {{years}} Sibylle Bürgi-Lütscher'
+  copyright_code: 'Design & Code © {{years}} {{holder}}'
+  region: 'Baselland · Schweiz'
+
+errors:
+  generic_title: 'Etwas ist schiefgelaufen'
+  unknown: 'Unbekannter Fehler'
+
+not_found:
+  title: '404'
+  message: 'Seite nicht gefunden.'
+  back_home: 'Zurück zur Startseite'

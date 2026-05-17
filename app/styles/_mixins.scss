@@ -1,0 +1,18 @@
+// `@include dark { ... }` emits TWO selectors for the same body context:
+//   1. `body.dark &` — when the inline theme bootstrap set the dark class
+//      (JS executed, user/OS prefers dark)
+//   2. `@media (prefers-color-scheme: dark) body:not(.dark):not(.light) &`
+//      — no-JS fallback: bootstrap never ran, so we trust the OS hint
+//
+// Use this anywhere a rule needs to fire in dark mode, instead of writing
+// `body.dark &` directly — that selector misses the no-JS path.
+@mixin dark {
+  body.dark & {
+    @content;
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not(.dark):not(.light) & {
+      @content;
+    }
+  }
+}

@@ -1,0 +1,117 @@
+// Global resets + document-level rules.
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+html {
+  // Smooth-scroll in-page anchor clicks (#leistungen, #kontakt, etc.).
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  // Nullify every animation/transition for users who request reduced motion.
+  // 0.01ms (not 0s) keeps transitionend/animationend events firing so any
+  // listener-based code still works; !important overrides Tailwind utility
+  // specificity. Single rule catches CSS transitions, @keyframes animations,
+  // and every Tailwind transition-* / animate-* / duration-* utility.
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  // Solid header — drop the alpha from --header-bg so the sticky nav
+  // stops showing page content through it. Light = same hue as --map-bg
+  // (the already-solid sibling token); dark = the canvas --bg.
+  :root {
+    --header-bg: oklch(95.4% 0.013 82.4deg);
+  }
+  body.dark {
+    --header-bg: oklch(23.0% 0.020 167.0deg);
+  }
+
+  // Disable backdrop blur everywhere. With a solid header behind it the
+  // blur has no visual effect anyway, and dropping it lightens compositing.
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+// Header offset for anchor-link scrolls lives on the *targets* via
+// `scroll-margin-top`, NOT on the scroll container via `scroll-padding-top`.
+// Container-level padding makes Chrome think every focused element near the
+// viewport edge is "out of view" and triggers its scroll-focused-into-view
+// routine — visible as a smooth page-jump every time the no-JS menu
+// checkbox gets focused. Target-level margin only applies when the target
+// is the scroll subject, so it pads anchor scrolls without affecting focus
+// behaviour.
+[id='home'],
+[id='leistungen'],
+[id='ueber-mich'],
+[id='kontakt'] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (max-width: 48rem) {
+  [id='home'],
+  [id='leistungen'],
+  [id='ueber-mich'],
+  [id='kontakt'] {
+    scroll-margin-top: 4rem;
+  }
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// Theme flip: cascade a soft cross-fade through everything that consumes the
+// tokens. Targeted properties only — avoids the cost of all-property
+// transitions on every element. Wrapped in `@layer base` so Tailwind
+// utilities (e.g. `transition-[translate,rotate]` on the theme toggle's
+// icon swap) can override on specific elements that need other transition
+// properties; without the layer, non-layered rules trump every utility.
+@layer base {
+  body,
+  body * {
+    transition:
+      background-color 0.4s ease,
+      color 0.4s ease,
+      border-color 0.4s ease,
+      fill 0.4s ease,
+      stroke 0.4s ease;
+  }
+}
+
+// `a { color: inherit }` is intentionally NOT set here — Tailwind's
+// preflight already provides it inside `@layer base`. Adding the rule
+// outside any @layer would beat Tailwind utility classes in the cascade
+// (non-layered > @layer utilities) and prevent `text-*` classes on
+// anchors from applying.
+
+img { max-width: 100%; display: block; }

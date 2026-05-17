@@ -1,0 +1,11 @@
+// Entry point. Order matters: tokens declare CSS variables, base resets the
+// document, then component/section partials build on top. Mobile breakpoints
+// live alongside their component instead of in a single bottom-of-file block.
+
+@use 'tokens';
+@use 'base';
+@use 'animations';
+@use 'brand';
+@use 'nav';
+@use 'sections/hero';
+@use 'sections/map';

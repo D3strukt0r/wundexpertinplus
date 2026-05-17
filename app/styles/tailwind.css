@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* Tailwind theme: only tokens we want Tailwind to consume directly.
+   Colours stay in _tokens.scss because the runtime light/dark flip relies
+   on a `:root` + `body.dark` cascade that @theme can't replicate. */
+@theme {
+  /* Cap the container at xl — no 2xl step in this design. */
+  --breakpoint-2xl: initial;
+
+  /* Fonts (mirrored in _tokens.scss for legacy --serif/--sans SCSS names). */
+  --font-serif: "Cormorant Garamond", "Times New Roman", serif;
+  --font-sans:  "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Color tokens — reference the runtime CSS variables in _tokens.scss so
+     the light/dark flip cascade still works (var() resolves at use-time,
+     so `text-ink` follows body.dark just like raw var(--ink) does). */
+  --color-bg:           var(--bg);
+  --color-bg-deep:      var(--bg-deep);
+  --color-paper:        var(--paper);
+  --color-ink:          var(--ink);
+  --color-ink-soft:     var(--ink-soft);
+  --color-green:        var(--green);
+  --color-green-soft:   var(--green-soft);
+  --color-tan:          var(--tan);
+  --color-tan-deep:     var(--tan-deep);
+  --color-line:         var(--line);
+  --color-header:       var(--header-bg);
+  --color-map:          var(--map-bg);
+  --color-shadow:       var(--shadow-soft);
+  --color-green-fixed:  var(--green-fixed);
+  --color-paper-fixed:  var(--paper-fixed);
+  --color-tan-fixed:    var(--tan-fixed);
+  --color-on-primary:   var(--on-primary);
+  --color-cta-dot:      var(--cta-dot-bg);
+
+  /* Tiny eyebrow caps below text-xs (12px). */
+  --text-micro: 0.625rem;  /* 10px */
+
+  /* Project spacing extensions for the half-step rhythm Tailwind's
+     dynamic scale doesn't cover (4.5 / 5.5 × --spacing). */
+  --spacing-hairline:   0.09375rem; /* 1.5px — burger lines */
+  --spacing-stack:      1.125rem;  /* 18px — common vertical rhythm */
+  --spacing-stack-lg:   1.375rem;  /* 22px — wider rhythm */
+
+  /* Uppercase eyebrow tracking ladder. Tailwind's tracking-widest tops at
+     0.1em; the design pushes wider for caps labels. */
+  --tracking-eyebrow-tight:   0.14em;
+  --tracking-eyebrow:         0.18em;
+  --tracking-eyebrow-wide:    0.22em;
+  --tracking-eyebrow-widest:  0.3em;
+
+  /* Custom shadows reference CSS vars so the light/dark cascade still
+     flips correctly. */
+  --shadow-card:  0 1.75rem 3.75rem -2rem var(--shadow-soft);
+  --shadow-hover: 0 0.5rem 1.5rem -0.75rem var(--color-shadow);
+
+  /* Soft easing curve used across hover/transition effects. */
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Semantic CSS variables consumed via var(...) in SCSS.
+   Tailwind v4 tree-shakes unused @theme tokens, so these live outside
+   @theme to guarantee emission. They are intentionally not exposed as
+   Tailwind utilities (no `gap-block` etc.) — SCSS reads them directly. */
+:root {
+  --spacing-section-y:     7.5rem;   /* section vertical padding */
+  --spacing-section-x:     3.5rem;   /* section horizontal padding */
+  --spacing-section-mt:    5rem;     /* margin between section bodies */
+  --spacing-block:         4rem;     /* large grid gaps */
+  --spacing-row:           1rem;     /* inline gap */
+  --spacing-gutter-mobile: 1.25rem;  /* mobile horizontal padding */
+
+  --text-eyebrow:          0.75rem;
+  --text-meta:             0.875rem;
+  --text-micro:            0.6875rem;
+}
+
+/* Class-based dark variant. Overrides Tailwind's default `dark:` (which
+   uses `prefers-color-scheme: dark`) to follow this project's
+   `body.dark` cascade instead. Color tokens already flip via the
+   _tokens.scss cascade, so `dark:` is mostly used for transform/opacity
+   utilities on elements like the theme-toggle icon swap. */
+@custom-variant dark (&:where(body.dark, body.dark *));
+
+/* `no-js:` — applies when the inline themeBootstrap hasn't added the
+   `.js` class to body (script disabled, blocked, or failed). Used to
+   hide UI that has no meaningful no-JS state (scroll-to-top button,
+   theme toggle). */
+@custom-variant no-js (&:where(body:not(.js), body:not(.js) *));
+
+/* Custom container caps. The default Tailwind container sets
+   `max-width = breakpoint-value`, which means at the exact viewport where
+   the breakpoint triggers (e.g. 1280px for xl), the available width
+   (viewport - scrollbar ≈ 1265px) is *less* than the cap, so the container
+   doesn't snap — it widens by ~15px once viewport > 1280 + scrollbar.
+   Setting each cap 1rem below its breakpoint reserves room for the
+   scrollbar so the container hits its max-width immediately at every
+   breakpoint and never drifts as the viewport grows further. */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  @media (min-width: 40rem) { max-width: 39rem; }   /* sm  640 → 624 */
+  @media (min-width: 48rem) { max-width: 47rem; }   /* md  768 → 752 */
+  @media (min-width: 64rem) { max-width: 63rem; }   /* lg 1024 → 1008 */
+  @media (min-width: 80rem) { max-width: 79rem; }   /* xl 1280 → 1264 */
+}
+
+/* Drawer-specific transition — Tailwind has no built-in transition-property
+   for max-height, and arbitrary `transition-[max-height]` is what we're
+   trying to avoid. Named utility keeps the call site clean and lets the
+   easing/duration reuse the project's --ease-soft token. */
+@utility transition-drawer {
+  transition: max-height 0.35s var(--ease-soft);
+}
