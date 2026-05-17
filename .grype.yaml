@@ -1,0 +1,34 @@
+# Grype configuration. Auto-discovered by `grype` when invoked from this
+# directory, so ci.yml's vulnerability scan step picks it up without needing
+# an explicit `--config` flag.
+#
+# Each ignore entry should record WHY the vulnerability is not actionable so
+# a future reader can audit the suppression. Remove the entry as soon as the
+# upstream fix lands in our nixpkgs channel (currently `nixos-25.11`).
+
+ignore:
+  # CVE-2026-5773 / 6276 / 5545 / 7168 / 6253 / 6429 / 4873 / 7009 — curl
+  # 8.19.0 issues, all fixed in curl 8.20.0. Reported by Grype because
+  # nixos-25.11 has not yet backported the 8.20.0 release.
+  #
+  # Why ignored:
+  #   - curl is in the image only to back the OCI HEALTHCHECK CMD
+  #     `curl -fsS http://localhost:3000/` (flake.nix `Healthcheck.Test`).
+  #     Inputs are static and trusted: literal localhost URL over plain HTTP,
+  #     no attacker influence over arguments, headers, or response body.
+  #   - Container runs as `nonroot:65532`; port 3000 is the only advertised
+  #     ingress; curl never makes outbound calls to attacker-reachable hosts.
+  #   - `curlSlim` (flake.nix) disables scp, gss, psl, brotli, zstd, ldap,
+  #     rtmp, http3, and websocket support — eliminating the protocol/parser
+  #     surface most curl CVEs target.
+  #
+  # Remove when `nixos-25.11` backports curl 8.20.0+. Check via:
+  #   nix eval --raw github:NixOS/nixpkgs/nixos-25.11#curl.version
+  - vulnerability: CVE-2026-5773
+  - vulnerability: CVE-2026-6276
+  - vulnerability: CVE-2026-5545
+  - vulnerability: CVE-2026-7168
+  - vulnerability: CVE-2026-6253
+  - vulnerability: CVE-2026-6429
+  - vulnerability: CVE-2026-4873
+  - vulnerability: CVE-2026-7009

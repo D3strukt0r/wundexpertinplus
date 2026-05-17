@@ -80,13 +80,6 @@ Vagrant.configure('2') do |config|
     # --------------------------------------------------------------------------
     # Configure the synced folders
     # --------------------------------------------------------------------------
-    # TODO: Function to check if Yarn is installed on the host machine
-    #def yarn_installed?
-    #  system("yarn --version > /dev/null 2>&1")
-    #end
-    # Get the path of the Yarn cache if Yarn is installed
-    #yarn_cache_path = yarn_installed? ? `yarn cache dir`.strip : nil
-
     if settings.dig('folder', 'type') == 'nfs'
         config.nfs.map_uid = Process.uid
         config.nfs.map_gid = Process.gid
@@ -97,12 +90,6 @@ Vagrant.configure('2') do |config|
             nfs_version: 3, # TODO: Update to NFSv4
             nfs_udp: false, # UDP not allowed in NFSv4
             mount_options: ['rw', 'tcp', 'nolock', 'async']
-
-        # TODO: Set up synced folder using NFS if Yarn cache path is available
-        #if yarn_cache_path
-        #    config.vm.synced_folder yarn_cache_path, "/home/vagrant/data/yarn",
-        #        type: 'nfs'
-        #end
     elsif settings.dig('folder', 'type') == 'rsync'
         config.vm.synced_folder '.', '/vagrant',
             type: 'rsync',
@@ -159,40 +146,47 @@ Vagrant.configure('2') do |config|
         sudo /etc/init.d/ssh restart
     SCRIPT
 
-    # Copy the public SSH key of the host system user to the vagrant box to
-    # allow Git access
-    if File.file?(File.expand_path('~/.ssh/id_ed25519')) && File.file?(File.expand_path('~/.ssh/id_ed25519.pub'))
-        config.vm.provision 'file', source: '~/.ssh/id_ed25519', destination: '~/.ssh/id_ed25519', run: 'always'
-        config.vm.provision 'file', source: '~/.ssh/id_ed25519.pub', destination: '~/.ssh/id_ed25519.pub', run: 'always'
-    elsif File.file?(File.expand_path('~/.ssh/id_rsa')) && File.file?(File.expand_path('~/.ssh/id_rsa.pub'))
-        puts 'Still using RSA? Consider switching to ED25519 for better security'
-        config.vm.provision 'file', source: '~/.ssh/id_rsa', destination: '~/.ssh/id_rsa', run: 'always'
-        config.vm.provision 'file', source: '~/.ssh/id_rsa.pub', destination: '~/.ssh/id_rsa.pub', run: 'always'
+    if settings.dig('ssh', 'forward_agent') == true
+        # https://unix.stackexchange.com/questions/77238/ssh-agent-forwarding-for-a-vagrant-vm
+        config.ssh.forward_agent = true
     else
-        puts 'No SSH key found, please generate them first'
-        puts 'ECDSA: $ ssh-keygen -t ed25519 -C "your_email@example.com"'
-        puts 'RSA:   $ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"'
-        exit
+        # Copy the public SSH key of the host system user to the vagrant box to
+        # allow Git access
+        if File.file?(File.expand_path('~/.ssh/id_ed25519')) && File.file?(File.expand_path('~/.ssh/id_ed25519.pub'))
+            config.vm.provision 'file', source: '~/.ssh/id_ed25519', destination: '~/.ssh/id_ed25519', run: 'always'
+            config.vm.provision 'file', source: '~/.ssh/id_ed25519.pub', destination: '~/.ssh/id_ed25519.pub', run: 'always'
+        elsif File.file?(File.expand_path('~/.ssh/id_rsa')) && File.file?(File.expand_path('~/.ssh/id_rsa.pub'))
+            puts 'Still using RSA? Consider switching to ED25519 for better security'
+            config.vm.provision 'file', source: '~/.ssh/id_rsa', destination: '~/.ssh/id_rsa', run: 'always'
+            config.vm.provision 'file', source: '~/.ssh/id_rsa.pub', destination: '~/.ssh/id_rsa.pub', run: 'always'
+        else
+            puts 'No SSH key found, please generate them first'
+            puts 'ECDSA: $ ssh-keygen -t ed25519 -C "your_email@example.com"'
+            puts 'RSA:   $ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"'
+            exit
+        end
+
+        config.vm.provision 'fix-ssh-permissions', type: 'shell', privileged: false, reset: true, inline: <<-SCRIPT
+            set -e -u -x -o pipefail
+            if [ -f ~/.ssh/id_ed25519 ]; then
+                chmod 600 ~/.ssh/id_ed25519
+            fi
+        SCRIPT
+
+        # Start SSH agent and add SSH key to agent
+        config.vm.provision 'start-ssh-agent-at-boot', type: 'shell', privileged: false, inline: <<-SCRIPT
+            set -e -u -x -o pipefail
+            echo 'eval "$(ssh-agent -s)"' >> ~/.bashrc
+            echo 'ssh-add -l > /dev/null || ssh-add' >> ~/.bashrc
+        SCRIPT
     end
-    config.vm.provision 'fix-ssh-permissions', type: 'shell', privileged: false, reset: true, inline: <<-SCRIPT
-        set -e -u -x -o pipefail
-        if [ -f ~/.ssh/id_ed25519 ]; then
-            chmod 600 ~/.ssh/id_ed25519
-        fi
-    SCRIPT
+
     config.vm.provision 'update-known_hosts', type: 'shell', privileged: false, reset: true, inline: <<-SCRIPT
         set -e -u -x -o pipefail
         ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
     SCRIPT
 
-    # Start SSH agent and add SSH key to agent
-    config.vm.provision 'start-ssh-agent-at-boot', type: 'shell', privileged: false, inline: <<-SCRIPT
-        set -e -u -x -o pipefail
-        echo 'eval "$(ssh-agent -s)"' >> ~/.bashrc
-        echo 'ssh-add -l > /dev/null || ssh-add' >> ~/.bashrc
-    SCRIPT
-
-    config.vm.provision 'chdir-to-dockerfile', type: 'shell', privileged: false, inline: <<-SCRIPT
+    config.vm.provision 'chdir-to-vagrant', type: 'shell', privileged: false, inline: <<-SCRIPT
         set -e -u -x -o pipefail
         echo 'cd /vagrant' >> ~/.bashrc
     SCRIPT
@@ -206,13 +200,17 @@ Vagrant.configure('2') do |config|
     config.vm.provision 'fix-app-data-permissions', type: 'shell', privileged: false, run: 'always', inline: <<-SCRIPT
         set -e -u -x -o pipefail
         sudo chown --recursive vagrant:vagrant ~/data
+        sudo chown --recursive 999:999 ~/data/pnpm
     SCRIPT
 
-    # Copy compose.yml.dist if it doesn't exist yet to compose.yml
+    # Copy compose.vm.yml.dist if compose.vm.yml doesn't exist yet. We use a
+    # separate file from the host/devcontainer compose.yml (which is
+    # checked-in and serves the non-Vagrant dev flow) so the synced /vagrant
+    # folder doesn't clobber it.
     config.vm.provision 'copy-necessary-dist-files', type: 'shell', privileged: false, run: 'always', inline: <<-SCRIPT
         set -e -u -x -o pipefail
-        if [ ! -f /vagrant/compose.yml ]; then
-            cp /vagrant/compose.vm.yml.dist /vagrant/compose.yml
+        if [ ! -f /vagrant/compose.vm.yml ]; then
+            cp /vagrant/compose.vm.yml.dist /vagrant/compose.vm.yml
         fi
     SCRIPT
 
@@ -224,7 +222,7 @@ Vagrant.configure('2') do |config|
 
     config.vm.provision 'check-certificates', type: 'shell', privileged: false, run: 'always', inline: <<-SCRIPT
         set -e -u -x -o pipefail
-        if [ ! -f /vagrant/.docker/certs/cert.pem ] || [ ! -f /vagrant/.docker/certs/cert.pem ]; then
+        if [ ! -f /vagrant/.docker/certs/cert.pem ] || [ ! -f /vagrant/.docker/certs/key.pem ]; then
             echo "Certificate files are missing. Please run 'mkcert -cert-file ./.docker/certs/cert.pem -key-file ./.docker/certs/key.pem localhost wundexpertinplus.test "*.wundexpertinplus.test"' on the host machine."
         fi
     SCRIPT
@@ -317,18 +315,29 @@ Vagrant.configure('2') do |config|
     config.trigger.after :up do |trigger|
         trigger.name = 'Start Containers'
         trigger.info = 'Starting Docker containers...'
-        trigger.run_remote = { privileged: false, inline: <<-SCRIPT
-            set -e -u -x -o pipefail
-            cd /vagrant
-            eval "$(ssh-agent -s)"
-            ssh-add -l > /dev/null || ssh-add
-            docker compose pull
-            docker compose build --pull
-            docker compose up --detach
-        SCRIPT
-        }
+        if settings.dig('ssh', 'forward_agent') == true
+            trigger.run_remote = { privileged: false, inline: <<-SCRIPT
+                set -e -u -x -o pipefail
+                cd /vagrant
+                docker compose -f compose.vm.yml pull
+                docker compose -f compose.vm.yml build --pull
+                docker compose -f compose.vm.yml --profile dev up --detach
+            SCRIPT
+            }
+        else
+            trigger.run_remote = { privileged: false, inline: <<-SCRIPT
+                set -e -u -x -o pipefail
+                cd /vagrant
+                eval "$(ssh-agent -s)"
+                ssh-add -l > /dev/null || ssh-add
+                docker compose -f compose.vm.yml pull
+                docker compose -f compose.vm.yml build --pull
+                docker compose -f compose.vm.yml --profile dev up --detach
+            SCRIPT
+            }
+        end
     end
-    config.vm.post_up_message = 'Machine was booted. Docker is starting. To check use "docker compose logs -f pwa api".'
+    config.vm.post_up_message = 'Machine was booted. Docker is starting. To check use "docker compose -f compose.vm.yml logs -f dev".'
     if settings.dig('network', 'hostname') || settings.dig('network', 'ip')
         config.vm.post_up_message += ' The application will soon be available on https://' + (settings.dig('network', 'hostname') || settings.dig('network', 'ip'))
     end
@@ -339,7 +348,7 @@ Vagrant.configure('2') do |config|
         trigger.run_remote = { privileged: false, inline: <<-SCRIPT
             set -e -u -x -o pipefail
             cd /vagrant
-            docker compose down
+            docker compose -f compose.vm.yml down
         SCRIPT
         }
     end

@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Audit (lockfile vulnerabilities)
+        id: audit
+        continue-on-error: true
+        run: bash .github/scripts/summarize-step.sh "Audit (lockfile)" pnpm audit --audit-level=moderate
+
+      - name: Lint
+        id: lint
+        continue-on-error: true
+        run: bash .github/scripts/summarize-step.sh "Lint" pnpm run lint
+
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        run: bash .github/scripts/summarize-step.sh "Typecheck" pnpm run typecheck
+
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: bash .github/scripts/summarize-step.sh "Test" pnpm run test
+
+      - name: Build (SSR)
+        id: build-ssr
+        continue-on-error: true
+        env:
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: bash .github/scripts/summarize-step.sh "Build (SSR)" pnpm run build
+
+      - name: Build (static / SPA)
+        id: build-spa
+        continue-on-error: true
+        env:
+          SSR: 'false'
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: bash .github/scripts/summarize-step.sh "Build (static / SPA)" pnpm run build
+
+      - name: Fail if any check failed
+        if: always()
+        run: |
+          if [ "${{ steps.audit.outcome }}" = "failure" ] \
+             || [ "${{ steps.lint.outcome }}" = "failure" ] \
+             || [ "${{ steps.typecheck.outcome }}" = "failure" ] \
+             || [ "${{ steps.test.outcome }}" = "failure" ] \
+             || [ "${{ steps.build-ssr.outcome }}" = "failure" ] \
+             || [ "${{ steps.build-spa.outcome }}" = "failure" ]; then
+            exit 1
+          fi

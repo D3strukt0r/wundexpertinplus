@@ -1,0 +1,15 @@
+// Plus+Plaster brandmark theme overrides.
+// Default fills (light) + `prefers-color-scheme: dark` fallback live inside
+// `app/assets/brand/plaster-plus.svg`'s own <style> block, so the standalone
+// favicon (browser tab) renders correctly without any external CSS. When the
+// SVG is inlined into the page (Nav brand mark) the user can toggle theme
+// explicitly via `body.dark` / `body.light`; these rules win over the SVG's
+// inline @media because the body-class selector has higher specificity.
+body.dark {
+  .brand-plaster__bg      { fill: oklch(38.2% 0.041 166.3deg); }
+  .brand-plaster__strip-v { fill: oklch(97.7% 0.011 84.6deg); }
+}
+body.light {
+  .brand-plaster__bg      { fill: oklch(95.4% 0.013 82.4deg); }
+  .brand-plaster__strip-v { fill: oklch(38.2% 0.041 166.3deg); }
+}
