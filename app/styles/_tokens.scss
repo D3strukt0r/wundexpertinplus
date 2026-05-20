@@ -23,26 +23,26 @@
 // `prefers-color-scheme` fallback) so the `var()` re-resolves there.
 
 :root {
-  --bg:           oklch(95.4% 0.013 82.4deg);
-  --bg-deep:      oklch(91.6% 0.024 82.1deg);
-  --paper:        oklch(97.7% 0.011 84.6deg);
-  --ink:          oklch(25.1% 0.014 163.6deg);
-  --ink-soft:     oklch(39.5% 0.021 158.3deg);
-  --green:        oklch(38.2% 0.041 166.3deg);
-  --green-soft:   oklch(46.8% 0.048 166.3deg);
-  --tan:          oklch(78.9% 0.036 78.6deg);
-  --tan-deep:     oklch(67.5% 0.046 73.9deg);
-  --line:         oklch(25.1% 0.014 163.6deg / 0.14);
-  --header-bg:    oklch(95.4% 0.013 82.4deg / 0.86);
-  --map-bg:       oklch(95.4% 0.013 82.4deg);
-  --shadow-soft:  oklch(25.1% 0.014 163.6deg / 0.35);
+  --bg:           oklch(95.4% 3.25% 82.4deg);
+  --bg-deep:      oklch(91.6% 6% 82.1deg);
+  --paper:        oklch(97.7% 2.75% 84.6deg);
+  --ink:          oklch(25.1% 3.5% 163.6deg);
+  --ink-soft:     oklch(39.5% 5.25% 158.3deg);
+  --green:        oklch(38.2% 10.25% 166.3deg);
+  --green-soft:   oklch(46.8% 12% 166.3deg);
+  --tan:          oklch(78.9% 9% 78.6deg);
+  --tan-deep:     oklch(67.5% 11.5% 73.9deg);
+  --line:         oklch(25.1% 3.5% 163.6deg / 0.14);
+  --header-bg:    oklch(95.4% 3.25% 82.4deg / 0.86);
+  --map-bg:       oklch(95.4% 3.25% 82.4deg);
+  --shadow-soft:  oklch(25.1% 3.5% 163.6deg / 0.35);
 
   // Fixed tokens are only the ones the Kontakt SECTION needs to stay
   // cream-on-green in both themes. The praxis card sitting inside the
   // section is themed normally — paper in light, dark-paper in dark.
-  --green-fixed:    oklch(38.2% 0.041 166.3deg);
-  --paper-fixed:    oklch(97.7% 0.011 84.6deg);
-  --tan-fixed:      oklch(78.9% 0.036 78.6deg);
+  --green-fixed:    oklch(38.2% 10.25% 166.3deg);
+  --paper-fixed:    oklch(97.7% 2.75% 84.6deg);
+  --tan-fixed:      oklch(78.9% 9% 78.6deg);
 
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans:  'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -65,19 +65,19 @@
 }
 
 html.dark {
-  --bg:           oklch(23.0% 0.020 167.0deg);
-  --paper:        oklch(27.8% 0.023 162.7deg);
-  --ink:          oklch(92.3% 0.021 85.9deg);
-  --ink-soft:     oklch(74.8% 0.022 88.8deg);
-  --green:        oklch(79.5% 0.038 160.4deg);
-  --green-soft:   oklch(70.2% 0.044 160.4deg);
-  --tan:          oklch(78.9% 0.036 78.6deg);
-  --tan-deep:     oklch(81.4% 0.049 78.3deg);
-  --line:         oklch(92.3% 0.021 85.9deg / 0.16);
-  --header-bg:    oklch(23.0% 0.020 167.0deg / 0.88);
-  --map-bg:       oklch(25.2% 0.018 165.4deg);
-  --shadow-soft:  oklch(0% 0 0deg / 0.5);
-  --bg-deep:      oklch(25.5% 0.020 162.9deg);
+  --bg:           oklch(23.0% 5% 167.0deg);
+  --paper:        oklch(27.8% 5.75% 162.7deg);
+  --ink:          oklch(92.3% 5.25% 85.9deg);
+  --ink-soft:     oklch(74.8% 5.5% 88.8deg);
+  --green:        oklch(79.5% 9.5% 160.4deg);
+  --green-soft:   oklch(70.2% 11% 160.4deg);
+  --tan:          oklch(78.9% 9% 78.6deg);
+  --tan-deep:     oklch(81.4% 12.25% 78.3deg);
+  --line:         oklch(92.3% 5.25% 85.9deg / 0.16);
+  --header-bg:    oklch(23.0% 5% 167.0deg / 0.88);
+  --map-bg:       oklch(25.2% 4.5% 165.4deg);
+  --shadow-soft:  oklch(0% 0% 0deg / 0.5);
+  --bg-deep:      oklch(25.5% 5% 162.9deg);
 
   --on-primary: var(--bg);
   --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);
@@ -112,19 +112,19 @@ html.dark {
 // chosen light (which they can't without JS, so this is always when no JS).
 @media (prefers-color-scheme: dark) {
   html:not(.light):not(.dark) {
-    --bg:           oklch(23.0% 0.020 167.0deg);
-    --paper:        oklch(27.8% 0.023 162.7deg);
-    --ink:          oklch(92.3% 0.021 85.9deg);
-    --ink-soft:     oklch(74.8% 0.022 88.8deg);
-    --green:        oklch(79.5% 0.038 160.4deg);
-    --green-soft:   oklch(70.2% 0.044 160.4deg);
-    --tan:          oklch(78.9% 0.036 78.6deg);
-    --tan-deep:     oklch(81.4% 0.049 78.3deg);
-    --line:         oklch(92.3% 0.021 85.9deg / 0.16);
-    --header-bg:    oklch(23.0% 0.020 167.0deg / 0.88);
-    --map-bg:       oklch(25.2% 0.018 165.4deg);
-    --shadow-soft:  oklch(0% 0 0deg / 0.5);
-    --bg-deep:      oklch(25.5% 0.020 162.9deg);
+    --bg:           oklch(23.0% 5% 167.0deg);
+    --paper:        oklch(27.8% 5.75% 162.7deg);
+    --ink:          oklch(92.3% 5.25% 85.9deg);
+    --ink-soft:     oklch(74.8% 5.5% 88.8deg);
+    --green:        oklch(79.5% 9.5% 160.4deg);
+    --green-soft:   oklch(70.2% 11% 160.4deg);
+    --tan:          oklch(78.9% 9% 78.6deg);
+    --tan-deep:     oklch(81.4% 12.25% 78.3deg);
+    --line:         oklch(92.3% 5.25% 85.9deg / 0.16);
+    --header-bg:    oklch(23.0% 5% 167.0deg / 0.88);
+    --map-bg:       oklch(25.2% 4.5% 165.4deg);
+    --shadow-soft:  oklch(0% 0% 0deg / 0.5);
+    --bg-deep:      oklch(25.5% 5% 162.9deg);
 
     --on-primary: var(--bg);
     --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);

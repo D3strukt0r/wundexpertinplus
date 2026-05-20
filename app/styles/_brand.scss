@@ -6,10 +6,10 @@
 // explicitly via `html.dark` / `html.light`; these rules win over the SVG's
 // inline @media because the class selector has higher specificity.
 html.dark {
-  .brand-plaster__bg      { fill: oklch(38.2% 0.041 166.3deg); }
-  .brand-plaster__strip-v { fill: oklch(97.7% 0.011 84.6deg); }
+  .brand-plaster__bg      { fill: oklch(38.2% 10.25% 166.3deg); }
+  .brand-plaster__strip-v { fill: oklch(97.7% 2.75% 84.6deg); }
 }
 html.light {
-  .brand-plaster__bg      { fill: oklch(95.4% 0.013 82.4deg); }
-  .brand-plaster__strip-v { fill: oklch(38.2% 0.041 166.3deg); }
+  .brand-plaster__bg      { fill: oklch(95.4% 3.25% 82.4deg); }
+  .brand-plaster__strip-v { fill: oklch(38.2% 10.25% 166.3deg); }
 }
