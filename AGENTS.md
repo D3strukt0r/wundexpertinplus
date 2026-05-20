@@ -39,9 +39,9 @@ In-page anchors (`#leistungen`, etc.) drive section navigation. Nav targets come
 
 ### Theme system
 
-`useTheme` returns `[theme, setTheme]`. Sets `body.light` / `body.dark` for CSS variable cascades. Persists to `localStorage['wundexpertinplus:theme']` and falls back to `prefers-color-scheme`. An inline `themeBootstrap` IIFE in `root.tsx` runs before hydration so the first paint matches the stored choice (no FOUC). The same IIFE adds `body.js` — see the no-JS section below for what that gates.
+`useTheme` returns `[theme, setTheme]`. Sets `html.light` / `html.dark` for CSS variable cascades. Persists to `localStorage['wundexpertinplus:theme']` and falls back to `prefers-color-scheme`. An inline `themeBootstrap` IIFE in `root.tsx` runs in `<head>` (before stylesheets evaluate) so the first paint matches the stored choice — no FOUC and no cross-fade animation. The same IIFE adds `html.js` — see the no-JS section below for what that gates. The class is on `<html>` (not `<body>`) so the script can run during head parsing, before `<body>` even exists.
 
-If JS is disabled, body has neither `.light` nor `.dark`. `_tokens.scss` mirrors the dark token values inside `@media (prefers-color-scheme: dark) body:not(.light):not(.dark) { ... }` so the OS preference still drives the palette.
+If JS is disabled, `<html>` has neither `.light` nor `.dark`. `_tokens.scss` mirrors the dark token values inside `@media (prefers-color-scheme: dark) html:not(.light):not(.dark) { ... }` so the OS preference still drives the palette.
 
 The **Kontakt** section is intentionally dark-green in both modes — its CTAs reference `--green-fixed` / `--paper-fixed`, not the themed `--green` / `--paper` tokens.
 
@@ -49,8 +49,8 @@ The **Kontakt** section is intentionally dark-green in both modes — its CTAs r
 
 The site renders correctly with JavaScript disabled. Several conventions enforce this:
 
-- **`body.js`** is added by the `themeBootstrap` IIFE before hydration. Use it as a CSS gate for anything whose *default* should be the final/visible state: e.g. `.reveal` defaults to opacity 1 / no transform; `body.js .reveal:not(.is-shown)` is what hides it pre-scroll-trigger (`_animations.scss`). Without JS, IntersectionObserver never runs, so without this gate every reveal would stay hidden forever.
-- **Tailwind `no-js:` variant** (`tailwind.css:67`) is a `@custom-variant` matching `body:not(.js)` — use it to hide controls that are dead without JS (theme toggle, scroll-to-top button).
+- **`html.js`** is added by the `themeBootstrap` IIFE before hydration. Use it as a CSS gate for anything whose *default* should be the final/visible state: e.g. `.reveal` defaults to opacity 1 / no transform; `html.js .reveal:not(.is-shown)` is what hides it pre-scroll-trigger (`_animations.scss`). Without JS, IntersectionObserver never runs, so without this gate every reveal would stay hidden forever.
+- **Tailwind `no-js:` variant** (`tailwind.css:67`) is a `@custom-variant` matching `html:not(.js)` — use it to hide controls that are dead without JS (theme toggle, scroll-to-top button).
 - **Mobile menu** is a hidden `<input type="checkbox">` + `<label>` + `:has(.site-nav__toggle:checked)` — works without JS via native label-for-input. React tracks `open` via the input's `onChange` (for aria-expanded and hashchange-close). **Don't add `onClick` on the label** — the native synthetic click is what we want. The hidden-checkbox styling is just utilities on the input (`absolute w-px h-px opacity-0 pointer-events-none`), not a class rule.
 - **Anchor-link header offset** uses `scroll-margin-top` on each section target (`#home`, `#leistungen`, `#ueber-mich`, `#kontakt`) in `_base.scss`, **not** `scroll-padding-top` on `<html>`. Container-level scroll-padding triggers Chrome's "scroll focused element into view" routine when the hidden menu checkbox gains focus, causing a visible page-jump on every menu toggle.
 
@@ -69,10 +69,10 @@ Two universal-selector blocks in `_base.scss` handle user preferences automatica
 app/styles/
   tailwind.css          @theme tokens + @utility (container, transition-drawer) + @custom-variant (dark, no-js)
   main.scss             @use index for the SCSS files below
-  _mixins.scss          @mixin dark (emits body.dark & + no-JS prefers-color-scheme fallback)
-  _tokens.scss          oklch CSS variables (:root + body.dark + no-JS @media)
+  _mixins.scss          @mixin dark (emits html.dark & + no-JS prefers-color-scheme fallback)
+  _tokens.scss          oklch CSS variables (:root + html.dark + no-JS @media)
   _base.scss            resets, scroll-margin targets, body color-flip transition, global reduced-motion + reduced-transparency overrides
-  _animations.scss      body.js .reveal:not(.is-shown) gate only (transition lives on <Reveal>)
+  _animations.scss      html.js .reveal:not(.is-shown) gate only (transition lives on <Reveal>)
   _brand.scss           SVG brand-mark theme overrides (need higher specificity than the SVG's inline <style>)
   _nav.scss             :has(.site-nav__toggle:checked) morph rules + burger span transition
   sections/_hero.scss   portrait blob filter
@@ -81,9 +81,9 @@ app/styles/
 
 Whole SCSS surface is ~430 LoC across 8 files. Everything else is utilities on the JSX.
 
-**Design tokens** (`_tokens.scss`) are `oklch()` CSS variables on `:root` (light) with `body.dark` overrides and a no-JS `prefers-color-scheme: dark` fallback. No hex / rgb / hsl anywhere in the SCSS (or in inline SVG fills). `tailwind.css` mirrors these as `--color-*` tokens inside `@theme` so utilities like `bg-paper`, `text-ink-soft`, `border-line` resolve via `var()` and follow the cascade at use-time.
+**Design tokens** (`_tokens.scss`) are `oklch()` CSS variables on `:root` (light) with `html.dark` overrides and a no-JS `prefers-color-scheme: dark` fallback. No hex / rgb / hsl anywhere in the SCSS (or in inline SVG fills). `tailwind.css` mirrors these as `--color-*` tokens inside `@theme` so utilities like `bg-paper`, `text-ink-soft`, `border-line` resolve via `var()` and follow the cascade at use-time.
 
-**The `dark` mixin** (`_mixins.scss`) emits BOTH `body.dark &` AND a no-JS `@media (prefers-color-scheme: dark) body:not(.dark):not(.light) &` selector. **Use `@include dark { ... }` for every dark-mode rule** — writing `body.dark &` directly misses the no-JS path. Partials that need it open with `@use 'mixins' as *;` (or `'../mixins'` from `sections/`).
+**The `dark` mixin** (`_mixins.scss`) emits BOTH `html.dark &` AND a no-JS `@media (prefers-color-scheme: dark) html:not(.dark):not(.light) &` selector. **Use `@include dark { ... }` for every dark-mode rule** — writing `html.dark &` directly misses the no-JS path. Partials that need it open with `@use 'mixins' as *;` (or `'../mixins'` from `sections/`).
 
 #### Custom `@theme` tokens
 
@@ -108,7 +108,7 @@ Two `@utility` declarations:
 
 Single source of truth: `app/assets/brand/plaster-plus.svg`.
 
-- **Inline in the page** — imported with `?react` in `Nav.tsx` as a React component, so theme overrides in `_brand.scss` (`body.dark .brand-plaster__bg { ... }`) can win over the SVG's inline `<style>` block via specificity.
+- **Inline in the page** — imported with `?react` in `Nav.tsx` as a React component, so theme overrides in `_brand.scss` (`html.dark .brand-plaster__bg { ... }`) can win over the SVG's inline `<style>` block via specificity.
 - **Standalone favicon** — the `favicon-rasters` Vite plugin (`app/vite/plugins/favicon-rasters.ts`) emits the SVG copy plus PNG rasters plus a multi-resolution `favicon.ico` (via `png-to-ico`) into `build/client/` at build time. The SVG's inline `<style>` has `prefers-color-scheme: dark` rules so the browser-tab favicon renders correctly on its own.
 - **CSS-class fills are inlined before raster** — libvips (sharp's SVG renderer) ignores external CSS rules, so a class-only SVG rasterises as all-black. The plugin walks the SVG's `<style>` block, parses the light-mode rules (skipping `@media` blocks), converts `oklch(...)` values to sRGB hex via `culori`'s `formatHex`, and injects them as inline `fill` / `stroke` / `opacity` attributes on every element with a matching `class="..."`. The browser-visible SVG copy (`/favicon.svg`) is the untouched original — only the buffer passed to sharp is rewritten.
 - **PWA icons** (192/512 maskable) come from the same SVG, sizes declared in `app/config/web-manifest.ts`'s `WEB_MANIFEST_ICONS`. The `web-manifest` plugin emits `site.webmanifest` referencing the same paths, so the manifest icon list and the rasterizer's emit set stay in lockstep.
@@ -171,7 +171,7 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 
 - **Build**: `nix build .#dockerImage` → `./result` is a docker-load-able tarball.
 - **Runtime layout**: app lives at `/opt/wundexpertinplus/{build,node_modules,package.json}`. User `nonroot:65532`. CMD `react-router-serve ./build/server/index.js`. Healthcheck `curl -fsS http://localhost:3000/` every 30 s.
-- **`pnpmDeps.hash`** is a fixed-output hash. Every lockfile change → new hash. First build with a stale hash fails with `specified: X / got: Y` — copy the `got` value in. `bin/bump-pnpm-hash.sh` automates the swap-to-fakeHash → read-`got:` → write-back cycle; `bump-pnpm-hash.yml` runs it on push.
+- **`pnpmDeps.hash`** is a fixed-output hash. Every lockfile change → new hash. First build with a stale hash fails with `specified: X / got: Y` — copy the `got` value in. `.github/scripts/bump-pnpm-hash.sh` automates the swap-to-fakeHash → read-`got:` → write-back cycle; `bump-pnpm-hash.yml` runs it on push.
 - **`SITE_HOST`** is a derivation attribute (`SITE_HOST = builtins.getEnv "SITE_HOST";`). Empty when unset → Vite's localhost fallback; CI sets it from the GH Pages API. See *Site hostname* above.
 
 ## Workflows
@@ -179,7 +179,7 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 - **`ci.yml`** — lint + typecheck + build + tests on every PR / push.
 - **`deploy-gh-pages.yml`** — fetches the Custom domain via `gh api .../pages --jq .cname`, exports it as `SITE_HOST`, runs `SSR=false pnpm build`, uploads via `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`. Fails fast if the API returns no custom domain.
 - **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. Reads the Pages custom domain once in `setup`, fans it out via job output to every arch in the `build` matrix as `SITE_HOST`. Requires `pages: read` permission (declared workflow-wide).
-- **`bump-pnpm-hash.yml`** — push-triggered when `pnpm-lock.yaml` / `package.json` changes; runs `bin/bump-pnpm-hash.sh` to refresh `pnpmDeps.hash` in `flake.nix`. Requires `GH_PAT`.
+- **`bump-pnpm-hash.yml`** — push-triggered when `pnpm-lock.yaml` / `package.json` changes; runs `.github/scripts/bump-pnpm-hash.sh` to refresh `pnpmDeps.hash` in `flake.nix`. Requires `GH_PAT`.
 - **`release.yml`** — `googleapis/release-please-action@v5`. Manages `package.json` (`version`) + `flake.nix` (`version = "X.Y.Z"; # x-release-please-version`). Uses `GH_PAT`.
 
 ## Gotchas
@@ -192,4 +192,4 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 - **pnpm via Corepack** on host/CI. Production image bypasses Corepack — uses `pkgs.pnpm_10` at build time, ships zero pnpm at runtime.
 - **Nav `Link` hrefs must include the leading `/`** (e.g. `/#kontakt`). Bare `#kontakt` makes react-router resolve relative to the current pathname.
 - **i18n init is guarded by `isInitialized`.** Changing options in `i18n.ts` requires a full dev-server restart (HMR can't re-run init). YAML *content* changes hot-reload via the `import.meta.hot.accept` hook in the same file.
-- **Don't write `body.dark &` directly in SCSS** — use `@include dark { ... }` so the no-JS `prefers-color-scheme` fallback selector is emitted too.
+- **Don't write `html.dark &` directly in SCSS** — use `@include dark { ... }` so the no-JS `prefers-color-scheme` fallback selector is emitted too.

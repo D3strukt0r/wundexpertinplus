@@ -1,6 +1,11 @@
 // Design tokens — palette + type.
-// Light is default; `body.dark` flips the runtime variables. Component rules
+// Light is default; `html.dark` flips the runtime variables. Component rules
 // consume the variables only — never the raw colour literals.
+//
+// Theme class lives on <html> (not <body>) so the bootstrap script can set
+// it from <head> before any stylesheet evaluates — see `themeBootstrap` in
+// `app/root.tsx`. With the class on :root before the body element exists,
+// the global body cross-fade transition has nothing to animate on load.
 //
 // Colours expressed in `oklch()` for perceptual uniformity (the design
 // handoff supplied hex; values here converted via culori one-off so dev/dark
@@ -14,7 +19,7 @@
 // CSS custom-property values are *computed at the declaring element*, so
 // without redeclaring `--color-paper` at every theme scope, `var(--paper)`
 // would always resolve at `:root` (= light) regardless of any descendant
-// override. We redeclare each alias inside `body.dark` (and the no-JS
+// override. We redeclare each alias inside `html.dark` (and the no-JS
 // `prefers-color-scheme` fallback) so the `var()` re-resolves there.
 
 :root {
@@ -59,7 +64,7 @@
   color-scheme: light;
 }
 
-body.dark {
+html.dark {
   --bg:           oklch(23.0% 0.020 167.0deg);
   --paper:        oklch(27.8% 0.023 162.7deg);
   --ink:          oklch(92.3% 0.021 85.9deg);
@@ -101,12 +106,12 @@ body.dark {
   color-scheme: dark;
 }
 
-// No-JS fallback: the themeBootstrap script never runs, so body has neither
+// No-JS fallback: the themeBootstrap script never runs, so <html> has neither
 // `.light` nor `.dark`. Honour the OS's prefers-color-scheme by applying the
 // dark overrides under that media query as long as the user hasn't explicitly
 // chosen light (which they can't without JS, so this is always when no JS).
 @media (prefers-color-scheme: dark) {
-  body:not(.light):not(.dark) {
+  html:not(.light):not(.dark) {
     --bg:           oklch(23.0% 0.020 167.0deg);
     --paper:        oklch(27.8% 0.023 162.7deg);
     --ink:          oklch(92.3% 0.021 85.9deg);

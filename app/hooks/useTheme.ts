@@ -22,7 +22,7 @@ function getSnapshot(): Theme {
   if (typeof document === 'undefined') {
     return 'light';
   }
-  return document.body.classList.contains('dark') ? 'dark' : 'light';
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 function getServerSnapshot(): Theme {
@@ -35,8 +35,8 @@ function applyTheme(theme: Theme) {
   } catch {
     // localStorage may throw in private mode / sandboxed contexts; ignore.
   }
-  document.body.classList.toggle('dark', theme === 'dark');
-  document.body.classList.toggle('light', theme === 'light');
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.documentElement.classList.toggle('light', theme === 'light');
   // Notify all subscribers so every useTheme consumer re-renders.
   subscribers.forEach((fn) => {
     fn();

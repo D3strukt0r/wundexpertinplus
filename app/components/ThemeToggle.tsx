@@ -20,7 +20,7 @@ const BUTTON = classNames(
   'no-js:hidden',
 );
 
-// Icon slots cross-fade and rotate when `body.dark` toggles. The `dark:`
+// Icon slots cross-fade and rotate when `html.dark` toggles. The `dark:`
 // variant is class-based (configured in tailwind.css) so it follows the
 // theme cascade rather than the OS media query.
 //
@@ -54,7 +54,7 @@ export function ThemeToggle({size = 'md'}: Props) {
       // The aria-label / title / aria-pressed all switch based on the resolved
       // theme; SSR has no access to localStorage or prefers-color-scheme, so
       // those attrs legitimately diverge on hydration. Suppress the warning —
-      // visual swap is driven by CSS reading body.dark, so users see the
+      // visual swap is driven by CSS reading html.dark, so users see the
       // right icon regardless of which side wins the markup race.
       suppressHydrationWarning
       type="button"

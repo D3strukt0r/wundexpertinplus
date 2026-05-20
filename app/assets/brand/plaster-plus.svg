@@ -12,7 +12,7 @@
            When the SVG is rendered standalone (browser favicon), the
            prefers-color-scheme @media here handles the OS-following dark
            variant. When inlined into the page, `main.scss` adds higher-
-           specificity `body.dark` / `body.light` overrides so the brand mark
+           specificity `html.dark` / `html.light` overrides so the brand mark
            tracks the user's explicit theme toggle as well. */
         .brand-plaster__bg       { fill: oklch(95.4% 0.013 82.4deg); }   /* cream */
         .brand-plaster__strip-v  { fill: oklch(38.2% 0.041 166.3deg); }  /* forest green */

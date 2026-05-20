@@ -43,7 +43,7 @@ html {
   :root {
     --header-bg: oklch(95.4% 0.013 82.4deg);
   }
-  body.dark {
+  html.dark {
     --header-bg: oklch(23.0% 0.020 167.0deg);
   }
 

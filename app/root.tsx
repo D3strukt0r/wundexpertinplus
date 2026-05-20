@@ -45,15 +45,21 @@ export const links: Route.LinksFunction = () => [
   {rel: 'manifest', href: '/site.webmanifest'},
 ];
 
-// Runs before React hydrates. Does two things in one inline pass:
-//   1. Sets body.light / body.dark for the first paint (avoids theme FOUC).
+// Runs in <head> before stylesheets evaluate. Writes to <html>
+// (`document.documentElement`) because <body> doesn't exist yet during head
+// parsing — putting the class on the root element pre-CSS-eval means body
+// inherits the dark variable cascade from its first computed style, so the
+// global `body, body *` transition in _base.scss has nothing to animate.
+// Does two things in one inline pass:
+//   1. Sets html.light / html.dark for the first paint (avoids theme FOUC
+//      and the cross-fade that fires when the class is added post-paint).
 //      Reads localStorage, falls back to prefers-color-scheme.
-//   2. Adds body.js so the reveal-on-scroll CSS gates the hidden state on
+//   2. Adds html.js so the reveal-on-scroll CSS gates the hidden state on
 //      JS being available — without JS, every `.reveal` element stays at
 //      its final visible state instead of opacity:0 forever.
 // Kept minified to one line for the fastest parse before hydration.
 // eslint-disable-next-line style/max-len -- inline IIFE intentionally minified to one line for fastest parse before hydration (avoids theme FOUC)
-const themeBootstrap = `(function(){try{var k='wundexpertinplus:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.body.classList.add(t,'js');}catch(e){document.body.classList.add('light','js');}})();`;
+const themeBootstrap = `(function(){try{var k='wundexpertinplus:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(t,'js');}catch(e){document.documentElement.classList.add('light','js');}})();`;
 
 export function Layout({children}: {children: React.ReactNode}) {
   return (
@@ -68,12 +74,14 @@ export function Layout({children}: {children: React.ReactNode}) {
         <meta name="apple-mobile-web-app-title" content="Wund Expertin Plus" />
         <meta name="theme-color" content="oklch(95.4% 0.013 82.4deg)" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="oklch(23.0% 0.020 167.0deg)" media="(prefers-color-scheme: dark)" />
+        {/* Must run before <Links /> so the theme class is on <html> before
+            any stylesheet evaluates — that's what prevents the FOUC. */}
+        {/* eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- themeBootstrap is a constant string defined above; no user input, no escaping needed */}
+        <script dangerouslySetInnerHTML={{__html: themeBootstrap}} />
         <Meta />
         <Links />
       </head>
       <body suppressHydrationWarning>
-        {/* eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- themeBootstrap is a constant string defined above; no user input, no escaping needed */}
-        <script dangerouslySetInnerHTML={{__html: themeBootstrap}} />
         <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
         <ScrollToHash />
         <ScrollRestoration getKey={(location) => location.pathname + location.search} />
