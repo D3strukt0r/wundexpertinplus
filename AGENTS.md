@@ -18,6 +18,11 @@ pnpm test:watch         # vitest in watch mode
 
 OCI image (Nix-built, no Dockerfile): `nix build .#dockerImage && docker load < result && docker run --rm -p 3000:3000 d3strukt0r/wundexpertinplus:latest`.
 
+## Maintenance rules for agents
+
+1. **Keep this file current.** When you change the build pipeline, add or remove a Vite plugin, change how `SITE_HOST` / env vars flow, change CI workflow inputs or outputs, or introduce a new config module, update the relevant section here in the same change set. Don't leave it lagging "for later".
+2. **Run `pnpm lint` and `pnpm typecheck` before declaring a task done.** Both must exit 0. A passing `pnpm build` is not enough — lint catches the `Buffer`-without-import / nullish-conditional / unused-arg class of bugs that Vite silently builds past. Fix them in the same change set, not in a follow-up.
+
 ## Architecture
 
 ### Dual-mode build is the central design fork
@@ -105,6 +110,8 @@ Single source of truth: `app/assets/brand/plaster-plus.svg`.
 
 - **Inline in the page** — imported with `?react` in `Nav.tsx` as a React component, so theme overrides in `_brand.scss` (`body.dark .brand-plaster__bg { ... }`) can win over the SVG's inline `<style>` block via specificity.
 - **Standalone favicon** — the `favicon-rasters` Vite plugin (`app/vite/plugins/favicon-rasters.ts`) emits the SVG copy plus PNG rasters plus a multi-resolution `favicon.ico` (via `png-to-ico`) into `build/client/` at build time. The SVG's inline `<style>` has `prefers-color-scheme: dark` rules so the browser-tab favicon renders correctly on its own.
+- **CSS-class fills are inlined before raster** — libvips (sharp's SVG renderer) ignores external CSS rules, so a class-only SVG rasterises as all-black. The plugin walks the SVG's `<style>` block, parses the light-mode rules (skipping `@media` blocks), converts `oklch(...)` values to sRGB hex via `culori`'s `formatHex`, and injects them as inline `fill` / `stroke` / `opacity` attributes on every element with a matching `class="..."`. The browser-visible SVG copy (`/favicon.svg`) is the untouched original — only the buffer passed to sharp is rewritten.
+- **PWA icons** (192/512 maskable) come from the same SVG, sizes declared in `app/config/web-manifest.ts`'s `WEB_MANIFEST_ICONS`. The `web-manifest` plugin emits `site.webmanifest` referencing the same paths, so the manifest icon list and the rasterizer's emit set stay in lockstep.
 
 Nothing favicon-related is committed — it's all regenerated each build.
 
@@ -117,10 +124,13 @@ Nothing favicon-related is committed — it's all regenerated each build.
 
 ### Vite plugins
 
-Two custom plugins live in `app/vite/plugins/`:
+Three custom plugins live in `app/vite/plugins/`:
 
 - **`favicon-rasters`** — described in *Brand mark and favicons*.
+- **`web-manifest`** — emits `site.webmanifest` to the build root. Sources `name` from `app/locales/de.yml`'s `brand.name` so a single edit propagates to the PWA install title. Other fields (`short_name`, `description`, `theme_color`, `background_color`, `display`, icon list) come from `app/config/web-manifest.ts` — the same module `favicon-rasters` reads to know which PNG sizes to render. Theme/background colors are stored as precomputed sRGB hex because several Android launchers still can't parse `oklch(...)`.
 - **`copyright-from-license`** — reads `LICENSE.txt`, exposes `__COPYRIGHT_YEARS__` and `__COPYRIGHT_HOLDER__` as build-time globals consumed by the footer copyright lines.
+
+There is no `public/site.webmanifest` — the file is generated, not committed.
 
 ### Google Maps
 
@@ -144,20 +154,32 @@ Nav target hrefs in `de.yml` are absolute (`/#kontakt`), not bare hash (`#kontak
 
 `app/locales/*.yml` are loaded as ES modules through `@modyfi/vite-plugin-yaml`. The ambient `*.yml` declaration lives in `app/globals.d.ts`.
 
+### Site hostname (`SITE_HOST`)
+
+The deployed hostname is **not** stored in the repo. Settings → Pages → Custom domain on the GitHub repo is the source of truth. CI workflows fetch it via `gh api "repos/{owner}/{repo}/pages" --jq '.cname'`, fail fast with `::error::` if it's empty or unreachable, and export it to the build as `SITE_HOST`.
+
+- `vite.config.ts` reads `process.env.SITE_HOST` (falling back to `localhost` for local dev) and feeds `https://${SITE_HOST}` to `vite-plugin-sitemap` and `vite-plugin-robots-ts`.
+- `deploy-gh-pages.yml` reads the value before `pnpm build` and passes it as a build-step env var.
+- `docker.yml` reads the value once in the `setup` job, fans it out via job output to every arch in the build matrix, and passes it as `SITE_HOST` to `nix build`. Workflow declares `pages: read` permission for the API call.
+- `flake.nix` forwards it into the pnpm derivation: `SITE_HOST = builtins.getEnv "SITE_HOST";` (requires `--impure`, which the docker workflow already uses for `DOCKER_LABELS_JSON`).
+
+If you need a different hostname for one build (rare — e.g. local prod-like preview), set `SITE_HOST=example.com pnpm build`.
+
 ## Production image (Nix-built OCI)
 
 **No Dockerfile.** Image produced by `flake.nix` via `pkgs.dockerTools.streamLayeredImage`, post-processed by `nix-utils`' `fixOciImageHistory` so layers show per-step Commands in Dive and Trivy stops flagging the synthetic `HEALTHCHECK` (DS-0026).
 
 - **Build**: `nix build .#dockerImage` → `./result` is a docker-load-able tarball.
 - **Runtime layout**: app lives at `/opt/wundexpertinplus/{build,node_modules,package.json}`. User `nonroot:65532`. CMD `react-router-serve ./build/server/index.js`. Healthcheck `curl -fsS http://localhost:3000/` every 30 s.
-- **`pnpmDeps.hash`** is a fixed-output hash. Every lockfile change → new hash. First build with a stale hash fails with `specified: X / got: Y` — copy the `got` value in.
+- **`pnpmDeps.hash`** is a fixed-output hash. Every lockfile change → new hash. First build with a stale hash fails with `specified: X / got: Y` — copy the `got` value in. `bin/bump-pnpm-hash.sh` automates the swap-to-fakeHash → read-`got:` → write-back cycle; `bump-pnpm-hash.yml` runs it on push.
+- **`SITE_HOST`** is a derivation attribute (`SITE_HOST = builtins.getEnv "SITE_HOST";`). Empty when unset → Vite's localhost fallback; CI sets it from the GH Pages API. See *Site hostname* above.
 
 ## Workflows
 
 - **`ci.yml`** — lint + typecheck + build + tests on every PR / push.
-- **`deploy-gh-pages.yml`** — `SSR=false pnpm build` → `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`.
-- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub.
-- **`bump-pnpm-hash.yml`** — push-triggered when `pnpm-lock.yaml` / `package.json` changes; updates `pnpmDeps.hash` in `flake.nix`. Requires `GH_PAT`.
+- **`deploy-gh-pages.yml`** — fetches the Custom domain via `gh api .../pages --jq .cname`, exports it as `SITE_HOST`, runs `SSR=false pnpm build`, uploads via `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`. Fails fast if the API returns no custom domain.
+- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. Reads the Pages custom domain once in `setup`, fans it out via job output to every arch in the `build` matrix as `SITE_HOST`. Requires `pages: read` permission (declared workflow-wide).
+- **`bump-pnpm-hash.yml`** — push-triggered when `pnpm-lock.yaml` / `package.json` changes; runs `bin/bump-pnpm-hash.sh` to refresh `pnpmDeps.hash` in `flake.nix`. Requires `GH_PAT`.
 - **`release.yml`** — `googleapis/release-please-action@v5`. Manages `package.json` (`version`) + `flake.nix` (`version = "X.Y.Z"; # x-release-please-version`). Uses `GH_PAT`.
 
 ## Gotchas
@@ -165,6 +187,8 @@ Nav target hrefs in `de.yml` are absolute (`/#kontakt`), not bare hash (`#kontak
 - **The `themeBootstrap` IIFE in `root.tsx`** is intentionally minified to a single line so it parses inline before hydration (avoids the theme FOUC).
 - **Google Maps API key is public-but-restricted.** It's ok in the client bundle because Google enforces HTTP-Referer restrictions on the key (whitelisted to the site's origins). Don't proxy it through a backend.
 - **`pnpmDeps.hash`** — every `pnpm-lock.yaml` change needs a paired hash bump in `flake.nix`.
+- **Don't reintroduce a `public/CNAME` file.** The hostname lives in Settings → Pages → Custom domain and is fetched at build time. Adding a checked-in `CNAME` would create two sources of truth that can drift, and GitHub Actions-mode deploys ignore the file anyway (only branch-publishing mode honors it).
+- **Favicon raster colors need inline attrs, not classes.** If you add a new element to `plaster-plus.svg`, give it a `class="brand-plaster__…"` matching one of the existing rules so the inline-styles pass picks it up. New CSS classes without corresponding rules in the SVG's `<style>` block will rasterise black.
 - **pnpm via Corepack** on host/CI. Production image bypasses Corepack — uses `pkgs.pnpm_10` at build time, ships zero pnpm at runtime.
 - **Nav `Link` hrefs must include the leading `/`** (e.g. `/#kontakt`). Bare `#kontakt` makes react-router resolve relative to the current pathname.
 - **i18n init is guarded by `isInitialized`.** Changing options in `i18n.ts` requires a full dev-server restart (HMR can't re-run init). YAML *content* changes hot-reload via the `import.meta.hot.accept` hook in the same file.

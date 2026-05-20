@@ -38,7 +38,7 @@ export const links: Route.LinksFunction = () => [
   // `prefers-color-scheme` `@media` block in its own <style> element, so a
   // single `<link rel="icon">` covers both. PNG + ICO are fallbacks for
   // browsers without SVG-favicon support.
-  {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+  {rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg'},
   {rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png'},
   {rel: 'shortcut icon', href: '/favicon.ico'},
   {rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png'},
