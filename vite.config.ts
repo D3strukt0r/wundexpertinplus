@@ -11,6 +11,7 @@ import svgr from 'vite-plugin-svgr';
 import {defineConfig} from 'vitest/config';
 import {copyrightFromLicense} from './app/vite/plugins/copyright-from-license';
 import {faviconRasters} from './app/vite/plugins/favicon-rasters';
+import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {webManifest} from './app/vite/plugins/web-manifest';
 
 const isVitest = process.env.VITEST === 'true';
@@ -68,6 +69,10 @@ export default defineConfig({
       content: `${ALLOW_ALL}\n`,
       sitemap: `${SITE_URL}/sitemap.xml`,
     })),
+    // Not wrapped in clientOnly: react-router writes build/client/index.html
+    // during the SSR build pass, after the client env's closeBundle has fired.
+    // Running on both envs lets the copy succeed on the SSR pass.
+    spaFallback({outDir: absOutDir}),
   ],
   resolve: {
     tsconfigPaths: true,

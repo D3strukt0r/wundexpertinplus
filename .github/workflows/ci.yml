@@ -124,7 +124,7 @@ jobs:
       - name: Ensure flake.nix has current pnpmDeps.hash
         env:
           DOCKER_LABELS_JSON: ''
-        run: ./bin/bump-pnpm-hash.sh
+        run: ./.github/scripts/bump-pnpm-hash.sh
 
       - name: Build OCI image with Nix
         run: |

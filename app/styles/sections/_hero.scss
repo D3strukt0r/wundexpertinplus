@@ -1,10 +1,10 @@
 // Portrait reveal animation. The default state is the FINAL one so no-JS
-// users see the portrait at rest. `body.js` (set by the theme bootstrap
+// users see the portrait at rest. `html.js` (set by the theme bootstrap
 // before hydration) gates the pre-shown state; the `is-shown` class is
 // flipped on by an IntersectionObserver once the portrait enters view.
 //
 // Kept as SCSS rather than inlined into JSX because the conditional
-// `body.js …:not(.is-shown)` selector covers two distinct cases — JS
+// `html.js …:not(.is-shown)` selector covers two distinct cases — JS
 // loaded but not yet shown vs. no JS at all — and React state alone can't
 // distinguish them.
 
@@ -19,7 +19,7 @@
   transition: transform 2.2s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-body.js .hero__portrait:not(.is-shown) {
+html.js .hero__portrait:not(.is-shown) {
   .hero__portrait-blob {
     opacity: 0;
     transform: scale(0.92) rotate(-3deg);

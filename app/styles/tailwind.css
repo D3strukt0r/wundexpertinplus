@@ -2,7 +2,7 @@
 
 /* Tailwind theme: only tokens we want Tailwind to consume directly.
    Colours stay in _tokens.scss because the runtime light/dark flip relies
-   on a `:root` + `body.dark` cascade that @theme can't replicate. */
+   on a `:root` + `html.dark` cascade that @theme can't replicate. */
 @theme {
   /* Cap the container at xl — no 2xl step in this design. */
   --breakpoint-2xl: initial;
@@ -13,7 +13,7 @@
 
   /* Color tokens — reference the runtime CSS variables in _tokens.scss so
      the light/dark flip cascade still works (var() resolves at use-time,
-     so `text-ink` follows body.dark just like raw var(--ink) does). */
+     so `text-ink` follows html.dark just like raw var(--ink) does). */
   --color-bg:           var(--bg);
   --color-bg-deep:      var(--bg-deep);
   --color-paper:        var(--paper);
@@ -77,16 +77,16 @@
 
 /* Class-based dark variant. Overrides Tailwind's default `dark:` (which
    uses `prefers-color-scheme: dark`) to follow this project's
-   `body.dark` cascade instead. Color tokens already flip via the
+   `html.dark` cascade instead. Color tokens already flip via the
    _tokens.scss cascade, so `dark:` is mostly used for transform/opacity
    utilities on elements like the theme-toggle icon swap. */
-@custom-variant dark (&:where(body.dark, body.dark *));
+@custom-variant dark (&:where(html.dark, html.dark *));
 
 /* `no-js:` — applies when the inline themeBootstrap hasn't added the
-   `.js` class to body (script disabled, blocked, or failed). Used to
+   `.js` class to <html> (script disabled, blocked, or failed). Used to
    hide UI that has no meaningful no-JS state (scroll-to-top button,
    theme toggle). */
-@custom-variant no-js (&:where(body:not(.js), body:not(.js) *));
+@custom-variant no-js (&:where(html:not(.js), html:not(.js) *));
 
 /* Custom container caps. The default Tailwind container sets
    `max-width = breakpoint-value`, which means at the exact viewport where

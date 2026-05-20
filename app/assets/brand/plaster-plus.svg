@@ -12,22 +12,22 @@
            When the SVG is rendered standalone (browser favicon), the
            prefers-color-scheme @media here handles the OS-following dark
            variant. When inlined into the page, `main.scss` adds higher-
-           specificity `body.dark` / `body.light` overrides so the brand mark
+           specificity `html.dark` / `html.light` overrides so the brand mark
            tracks the user's explicit theme toggle as well. */
-        .brand-plaster__bg       { fill: oklch(95.4% 0.013 82.4deg); }   /* cream */
-        .brand-plaster__strip-v  { fill: oklch(38.2% 0.041 166.3deg); }  /* forest green */
-        .brand-plaster__strip-h  { fill: oklch(78.9% 0.036 78.6deg); }   /* tan */
-        .brand-plaster__pad      { fill: oklch(78.9% 0.036 78.6deg); }   /* tan */
-        .brand-plaster__dot      { fill: oklch(38.2% 0.041 166.3deg); }  /* forest green */
+        .brand-plaster__bg       { fill: oklch(95.4% 3.25% 82.4deg); }   /* cream */
+        .brand-plaster__strip-v  { fill: oklch(38.2% 10.25% 166.3deg); }  /* forest green */
+        .brand-plaster__strip-h  { fill: oklch(78.9% 9% 78.6deg); }   /* tan */
+        .brand-plaster__pad      { fill: oklch(78.9% 9% 78.6deg); }   /* tan */
+        .brand-plaster__dot      { fill: oklch(38.2% 10.25% 166.3deg); }  /* forest green */
         .brand-plaster__stripe   {
-            stroke: oklch(38.2% 0.041 166.3deg);
+            stroke: oklch(38.2% 10.25% 166.3deg);
             stroke-width: 0.7;
             opacity: 0.55;
         }
 
         @media (prefers-color-scheme: dark) {
-            .brand-plaster__bg      { fill: oklch(38.2% 0.041 166.3deg); }  /* forest green ground */
-            .brand-plaster__strip-v { fill: oklch(97.7% 0.011 84.6deg); }   /* paper */
+            .brand-plaster__bg      { fill: oklch(38.2% 10.25% 166.3deg); }  /* forest green ground */
+            .brand-plaster__strip-v { fill: oklch(97.7% 2.75% 84.6deg); }   /* paper */
         }
     </style>
     <rect class="brand-plaster__bg" width="64" height="64" rx="12"/>

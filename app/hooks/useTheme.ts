@@ -2,6 +2,12 @@ import {useCallback, useSyncExternalStore} from 'react';
 
 const STORAGE_KEY = 'wundexpertinplus:theme';
 
+// Shared by the JSX `<meta name="theme-color">` tags in root.tsx, the inline
+// bootstrap that runs them on first paint, and `applyTheme` below. Same values
+// as the `--bg` token in `_tokens.scss` (light line 21, dark line 63).
+export const THEME_COLOR_LIGHT = 'oklch(95.4% 3.25% 82.4deg)';
+export const THEME_COLOR_DARK = 'oklch(23.0% 5% 167.0deg)';
+
 export type Theme = 'light' | 'dark';
 
 // Shared subscriber set so every `useTheme` consumer (nav toggle, map, …)
@@ -22,7 +28,7 @@ function getSnapshot(): Theme {
   if (typeof document === 'undefined') {
     return 'light';
   }
-  return document.body.classList.contains('dark') ? 'dark' : 'light';
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 function getServerSnapshot(): Theme {
@@ -35,8 +41,15 @@ function applyTheme(theme: Theme) {
   } catch {
     // localStorage may throw in private mode / sandboxed contexts; ignore.
   }
-  document.body.classList.toggle('dark', theme === 'dark');
-  document.body.classList.toggle('light', theme === 'light');
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.documentElement.classList.toggle('light', theme === 'light');
+  // Override every `<meta name="theme-color">` regardless of its `media`
+  // attribute. Both metas end up with the same value, so whichever one wins
+  // the browser's media match shows the chosen theme's chrome colour.
+  const color = theme === 'dark' ? THEME_COLOR_DARK : THEME_COLOR_LIGHT;
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    m.setAttribute('content', color);
+  });
   // Notify all subscribers so every useTheme consumer re-renders.
   subscribers.forEach((fn) => {
     fn();

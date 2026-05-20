@@ -22,6 +22,8 @@ export const WEB_MANIFEST = {
   description: 'Sibylle Bürgi-Lütscher · Dipl. Wundexpertin SAfW · Wundbehandlung in Baselland',
   lang: 'de',
   display: 'standalone',
+  // OS UI chrome (status bar, title bar) when the PWA is launched standalone.
   theme_color: '#f4efe6',
+  // Splash-screen fill shown while the installed PWA is booting.
   background_color: '#f4efe6',
 } as const;

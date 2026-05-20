@@ -41,10 +41,10 @@ html {
   // stops showing page content through it. Light = same hue as --map-bg
   // (the already-solid sibling token); dark = the canvas --bg.
   :root {
-    --header-bg: oklch(95.4% 0.013 82.4deg);
+    --header-bg: oklch(95.4% 3.25% 82.4deg);
   }
-  body.dark {
-    --header-bg: oklch(23.0% 0.020 167.0deg);
+  html.dark {
+    --header-bg: oklch(23.0% 5% 167.0deg);
   }
 
   // Disable backdrop blur everywhere. With a solid header behind it the

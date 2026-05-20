@@ -1,9 +1,9 @@
 // Reveal entrance animation — progressive enhancement.
-// No-JS users see content immediately (no body.js → no hidden state).
+// No-JS users see content immediately (no html.js → no hidden state).
 // With JS, the initial state is hidden; useReveal flips `.is-shown` when
 // the element scrolls into view. The transition itself lives on Reveal.tsx
 // as Tailwind utilities (transition duration-700 ease-soft).
-body.js .reveal:not(.is-shown) {
+html.js .reveal:not(.is-shown) {
   opacity: 0;
   transform: translateY(0.875rem);
 }

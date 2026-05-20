@@ -53,7 +53,7 @@ jobs:
       - name: Run bump script
         env:
           DOCKER_LABELS_JSON: ''
-        run: ./bin/bump-pnpm-hash.sh
+        run: ./.github/scripts/bump-pnpm-hash.sh
 
       - name: Configure git
         run: |
