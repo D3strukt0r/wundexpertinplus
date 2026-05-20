@@ -10,6 +10,8 @@
 #
 # Note that binary is a macro for -text -diff.
 
+*.sh text eol=lf
+
 # Exclude files from exporting
 .gitattributes export-ignore
 .gitignore     export-ignore

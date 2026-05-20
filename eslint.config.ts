@@ -2,7 +2,7 @@ import {iwfWebStandardTs} from '@iwf-web/eslint-coding-standard';
 
 export default iwfWebStandardTs({},
   {
-    ignores: ['build/**', '.react-router/**', 'bin/**', '.design-handoff/**'],
+    ignores: ['build/**', '.react-router/**', '.design-handoff/**'],
   },
   // The preset's allowDefaultProject glob (`*.ts`) collides with tsconfig's
   // `**/*.ts` include for root files like `vite.config.ts` — typescript-eslint
