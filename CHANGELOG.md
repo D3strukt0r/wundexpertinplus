@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0](https://github.com/D3strukt0r/wundexpertinplus/compare/1.0.1...2.0.0) (2026-05-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* drops the WordPress image, web.Dockerfile, and the docker/nginx rootfs. Old ci-cd.yml and contribution boilerplate (CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, SUPPORT, AUTHORS, CONTRIBUTORS, ACKNOWLEDGMENTS, issue/PR templates) are removed in favour of references to the org-level .github repo.
+
+### ✨ Features
+
+* rebuild site as React Router 7 SPA/SSR ([d82bc82](https://github.com/D3strukt0r/wundexpertinplus/commit/d82bc827fb40cdd753588bc222f73bc51b33d316))
+
 ## 1.0.1 (2020-05-29)
 
 
