@@ -1,19 +1,17 @@
 import type {Plugin} from 'vite';
+import {Buffer} from 'node:buffer';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import process from 'node:process';
+import {formatHex} from 'culori';
 import pngToIco from 'png-to-ico';
+import {WEB_MANIFEST_ICONS} from '../../config/web-manifest';
 
 interface Options {
   // Path (relative to project root) of the source SVG. The committed file
   // ships both light + dark variants via a `prefers-color-scheme` <style>
   // block; raster fallbacks here are always the SVG's light-mode rendering.
   source?: string;
-  // Path (relative to project root) of the web app manifest. PNG icons it
-  // declares in `icons[]` are added to the emit set so the manifest stays
-  // the single source of truth for PWA icons (192/512 maskable, etc.)
-  // without us re-declaring them in `PNG_SIZES`.
-  manifest?: string;
   // Output filename for the SVG copy emitted to the build root. Browser
   // tab `<link rel="icon">` references this. Defaults to `favicon.svg`.
   svgOut?: string;
@@ -32,47 +30,73 @@ const PNG_SIZES = [
 // at 32bpp, BMP-encoded inside the ICO container for maximum legacy support.
 const ICO_SIZES = [16, 32, 48] as const;
 
-interface ManifestIcon {
-  src: string;
-  sizes: string;
-  type?: string;
-  purpose?: string;
-}
-
-interface WebManifest {
-  icons?: ManifestIcon[];
-}
-
-const SQUARE_SIZE_RE = /^(\d+)x(\d+)$/;
 const WHITESPACE_RE = /\s+/;
+const STYLE_BLOCK_RE = /<style[^>]*>([\s\S]*?)<\/style>/i;
+const COMMENT_RE = /\/\*[\s\S]*?\*\//g;
+const AT_MEDIA_RE = /@media[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g;
+const RULE_RE = /\.([\w-]+)\s*\{([^}]+)\}/g;
+const CLASS_ATTR_RE = /class="([^"]+)"/g;
 
-// Pulls PNG `(size, fileName)` pairs out of a manifest. Skips anything we
-// can't render: non-PNG types, non-square sizes, multi-size declarations
-// (those belong in PNG_SIZES or ICO_SIZES). Reports skip reasons so the
-// build logs surface manifest entries that won't be regenerated.
-function pngIconsFromManifest(
-  manifest: WebManifest,
-  warn: (msg: string) => void,
-): {size: number; out: string}[] {
-  const out: {size: number; out: string}[] = [];
-  for (const icon of manifest.icons ?? []) {
-    if (icon.type !== undefined && icon.type !== 'image/png') {
-      warn(`[favicon-rasters] skipped ${icon.src}: type "${icon.type}" — only image/png is handled.`);
-      continue;
-    }
-    const tokens = icon.sizes.split(WHITESPACE_RE).filter(Boolean);
-    if (tokens.length !== 1) {
-      warn(`[favicon-rasters] skipped ${icon.src}: expected one size, got "${icon.sizes}".`);
-      continue;
-    }
-    const match = SQUARE_SIZE_RE.exec(tokens[0]!);
-    if (!match || match[1] !== match[2]) {
-      warn(`[favicon-rasters] skipped ${icon.src}: "${tokens[0]}" is not a square WxH size.`);
-      continue;
-    }
-    out.push({size: Number(match[1]), out: icon.src.startsWith('/') ? icon.src.slice(1) : icon.src});
+// libvips (used by sharp) does not resolve external CSS rules during SVG
+// rasterisation — `.classname { fill: ... }` is ignored, and elements fall
+// back to default fill = black. This walks the SVG's own `<style>` block,
+// parses the light-mode (non-@media) rules, and injects them as inline
+// `fill` / `stroke` / etc. attributes on every element with a matching
+// `class="..."` attribute. The original SVG buffer is left untouched so
+// the browser-visible SVG keeps its `prefers-color-scheme` `@media` block.
+function inlineLightModeStyles(svg: string): string {
+  const styleMatch = STYLE_BLOCK_RE.exec(svg);
+  if (!styleMatch) {
+    return svg;
   }
-  return out;
+
+  const lightBody = styleMatch[1]!
+    .replace(COMMENT_RE, '')
+    .replace(AT_MEDIA_RE, '');
+
+  const rules = new Map<string, Record<string, string>>();
+  for (const m of lightBody.matchAll(RULE_RE)) {
+    const cls = m[1]!;
+    const decls: Record<string, string> = {};
+    for (const decl of m[2]!.split(';')) {
+      const colonIdx = decl.indexOf(':');
+      if (colonIdx < 0) {
+        continue;
+      }
+      const k = decl.slice(0, colonIdx).trim();
+      const v = decl.slice(colonIdx + 1).trim();
+      if (k && v) {
+        decls[k] = convertValue(k, v);
+      }
+    }
+    rules.set(cls, decls);
+  }
+
+  return svg.replace(CLASS_ATTR_RE, (_full, classList: string) => {
+    const seen = new Set<string>();
+    let extra = '';
+    for (const cls of classList.split(WHITESPACE_RE)) {
+      const props = rules.get(cls);
+      if (!props) {
+        continue;
+      }
+      for (const [k, v] of Object.entries(props)) {
+        if (seen.has(k)) {
+          continue;
+        }
+        seen.add(k);
+        extra += ` ${k}="${v}"`;
+      }
+    }
+    return `class="${classList}"${extra}`;
+  });
+}
+
+function convertValue(prop: string, value: string): string {
+  if (prop === 'fill' || prop === 'stroke') {
+    return formatHex(value) ?? value;
+  }
+  return value;
 }
 
 // Generates PNG + ICO favicon fallbacks from the source SVG during the
@@ -82,10 +106,9 @@ function pngIconsFromManifest(
 // `?react` — one canonical brand mark, used everywhere.
 //
 // PNG outputs come from a mix of:
-//   1. The manifest's `icons[]` (kept untouched as the single source of truth
-//      for PWA icons),
-//   2. `PNG_SIZES` for non-manifest entries the manifest doesn't carry
-//      (favicon-96, apple-touch-icon),
+//   1. `WEB_MANIFEST_ICONS` (shared with the `web-manifest` plugin so the
+//      PWA install icons and the rasters stay in lockstep),
+//   2. `PNG_SIZES` for non-manifest entries (favicon-96, apple-touch-icon),
 //   3. `ICO_SIZES` for the multi-resolution `.ico`.
 // All emitted via `emitFile` so they land at the expected root URLs in
 // `build/client/` without going through `public/`.
@@ -93,7 +116,6 @@ function pngIconsFromManifest(
 // Runs in the client build only — SSR doesn't need favicons.
 export function faviconRasters(opts: Options = {}): Plugin {
   const source = opts.source ?? join('app', 'assets', 'brand', 'plaster-plus.svg');
-  const manifestPath = opts.manifest ?? join('public', 'site.webmanifest');
   const svgOut = opts.svgOut ?? 'favicon.svg';
 
   return {
@@ -103,24 +125,25 @@ export function faviconRasters(opts: Options = {}): Plugin {
     async generateBundle() {
       const sharp = (await import('sharp')).default;
       const svg = readFileSync(join(process.cwd(), source));
-      const manifest = JSON.parse(readFileSync(join(process.cwd(), manifestPath), 'utf8')) as WebManifest;
-      const manifestPngs = pngIconsFromManifest(manifest, (msg) => {
-        this.warn(msg);
-      });
 
       // Copy the source SVG to the build root so /favicon.svg keeps working
       // for `<link rel="icon">` tags. The same file is also imported via
       // `?react` for the Nav brand mark, so there's only one source.
       this.emitFile({type: 'asset', fileName: svgOut, source: svg});
 
+      // Raster pipeline gets a transformed SVG with class-based fills/strokes
+      // inlined onto each element (libvips ignores `<style>` rules).
+      const svgForRaster = Buffer.from(inlineLightModeStyles(svg.toString('utf8')), 'utf8');
+
       // Density 384 gives sharp enough headroom to rasterise the SVG up to
       // 512px without aliasing.
-      const renderPng = async (size: number) => sharp(svg, {density: 384})
+      const renderPng = async (size: number) => sharp(svgForRaster, {density: 384})
         .resize(size, size, {fit: 'contain', background: {r: 0, g: 0, b: 0, alpha: 0}})
         .png()
         .toBuffer();
 
-      for (const {size, out} of [...PNG_SIZES, ...manifestPngs]) {
+      const allPngs = [...PNG_SIZES, ...WEB_MANIFEST_ICONS.map((i) => ({size: i.size, out: i.out}))];
+      for (const {size, out} of allPngs) {
         const buf = await renderPng(size);
         this.emitFile({type: 'asset', fileName: out, source: buf});
       }
