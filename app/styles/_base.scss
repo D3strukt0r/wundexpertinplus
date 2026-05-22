@@ -101,22 +101,34 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-// Theme flip: cascade a soft cross-fade through everything that consumes the
-// tokens. Targeted properties only — avoids the cost of all-property
-// transitions on every element. Wrapped in `@layer base` so Tailwind
-// utilities (e.g. `transition-[translate,rotate]` on the theme toggle's
-// icon swap) can override on specific elements that need other transition
-// properties; without the layer, non-layered rules trump every utility.
-@layer base {
-  body,
-  body * {
-    transition:
-      background-color 0.4s ease,
-      color 0.4s ease,
-      border-color 0.4s ease,
-      fill 0.4s ease,
-      stroke 0.4s ease;
-  }
+// Theme cross-fade is driven by @property-registered color tokens on :root
+// (see `_tokens.scss`). Two suppression rules below keep per-element
+// `transition-colors` from racing the variable animation and lagging their
+// own duration behind (visibly holding the previous theme's colour on
+// elements like the nav buttons or map container for ~200ms after a flip).
+
+// JS path: while the @property color tokens are mid-animation (window after
+// `applyTheme` flips the dark class), suppress per-element transitions on
+// every descendant of <html>. `useTheme.ts` adds the class, schedules
+// removal for after the variable animation completes. Matched selector
+// excludes <html> itself so the :root @property transition keeps running.
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition: none !important;
+}
+
+// No-JS path: same lag problem, no class we can add on-the-fly. Restrict
+// per-element transitions to non-color properties so they can't chase the
+// @property variable animation. Per-element bg/border fades on hover are
+// sacrificed in this branch (snap instead of animate), but the only theme
+// change a no-JS user can trigger is an OS-level prefers-color-scheme flip
+// — that path now animates smoothly via the :root @property transition with
+// every element following in lockstep.
+html:not(.js) *,
+html:not(.js) *::before,
+html:not(.js) *::after {
+  transition-property: transform, translate, rotate, scale, opacity !important;
 }
 
 // `a { color: inherit }` is intentionally NOT set here — Tailwind's

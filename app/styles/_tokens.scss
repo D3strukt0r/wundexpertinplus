@@ -21,6 +21,28 @@
 // would always resolve at `:root` (= light) regardless of any descendant
 // override. We redeclare each alias inside `html.dark` (and the no-JS
 // `prefers-color-scheme` fallback) so the `var()` re-resolves there.
+//
+// `@property` registrations below make each themed color token interpolable.
+// The `:root { transition: --bg var(--theme-transition) ease, ... }`
+// declaration animates them between light/dark when the `html.dark` class is
+// toggled — by transitioning the *variables*, no per-element `transition:
+// color` rule exists for Chromium's cascade-inherit flicker bug to misfire
+// on (Tailwind #15598, Astro #8711). `initial-value` MUST match each :root
+// light value below — a mismatch would shift computed values at registration
+// and produce a one-frame flicker.
+@property --bg          { syntax: '<color>'; inherits: true; initial-value: oklch(95.4% 3.25% 82.4deg); }
+@property --bg-deep     { syntax: '<color>'; inherits: true; initial-value: oklch(91.6% 6% 82.1deg); }
+@property --paper       { syntax: '<color>'; inherits: true; initial-value: oklch(97.7% 2.75% 84.6deg); }
+@property --ink         { syntax: '<color>'; inherits: true; initial-value: oklch(25.1% 3.5% 163.6deg); }
+@property --ink-soft    { syntax: '<color>'; inherits: true; initial-value: oklch(39.5% 5.25% 158.3deg); }
+@property --green       { syntax: '<color>'; inherits: true; initial-value: oklch(38.2% 10.25% 166.3deg); }
+@property --green-soft  { syntax: '<color>'; inherits: true; initial-value: oklch(46.8% 12% 166.3deg); }
+@property --tan         { syntax: '<color>'; inherits: true; initial-value: oklch(78.9% 9% 78.6deg); }
+@property --tan-deep    { syntax: '<color>'; inherits: true; initial-value: oklch(67.5% 11.5% 73.9deg); }
+@property --line        { syntax: '<color>'; inherits: true; initial-value: oklch(25.1% 3.5% 163.6deg / 0.14); }
+@property --header-bg   { syntax: '<color>'; inherits: true; initial-value: oklch(95.4% 3.25% 82.4deg / 0.86); }
+@property --map-bg      { syntax: '<color>'; inherits: true; initial-value: oklch(95.4% 3.25% 82.4deg); }
+@property --shadow-soft { syntax: '<color>'; inherits: true; initial-value: oklch(25.1% 3.5% 163.6deg / 0.35); }
 
 :root {
   --bg:           oklch(95.4% 3.25% 82.4deg);
@@ -60,6 +82,44 @@
   // Inline dot on the phone-CTA pill. Warm tan against dark green; flips to
   // the dark canvas in dark mode where the pill turns light sage.
   --cta-dot-bg: var(--tan);
+
+  // Duration of the theme cross-fade. Source of truth for both the
+  // `transition` declaration below and the JS suppression timer in
+  // `useTheme.ts` (read via getComputedStyle).
+  --theme-transition: 400ms;
+
+  // Animate the @property-registered color tokens when html.dark is toggled
+  // (or when prefers-color-scheme flips in no-JS). Transition lives on the
+  // same element (html) where the cascade override fires, so the value
+  // change triggers interpolation. Per W3C CSS Transitions L1 transitions
+  // never fire on initial style update — so themeBootstrap setting the
+  // class before first paint is silent. Interrupting an in-flight
+  // transition picks up the current interpolated value as the new start
+  // (§3.4.3) — gives free spam-click responsiveness.
+  //
+  // Per-element `transition-colors` consumers would normally chase the
+  // animating var() value and lag their own duration behind it. Two
+  // complementary mechanisms in `_base.scss` keep them in lockstep:
+  //   - JS path: `useTheme.ts` adds `theme-changing` to <html> during the
+  //     toggle, suppressing per-element transitions for the animation
+  //     window.
+  //   - No-JS path: `html:not(.js) *` permanently restricts per-element
+  //     transitions to non-color properties so they can't chase the
+  //     variable.
+  transition:
+    --bg var(--theme-transition) ease,
+    --bg-deep var(--theme-transition) ease,
+    --paper var(--theme-transition) ease,
+    --ink var(--theme-transition) ease,
+    --ink-soft var(--theme-transition) ease,
+    --green var(--theme-transition) ease,
+    --green-soft var(--theme-transition) ease,
+    --tan var(--theme-transition) ease,
+    --tan-deep var(--theme-transition) ease,
+    --line var(--theme-transition) ease,
+    --header-bg var(--theme-transition) ease,
+    --map-bg var(--theme-transition) ease,
+    --shadow-soft var(--theme-transition) ease;
 
   color-scheme: light;
 }

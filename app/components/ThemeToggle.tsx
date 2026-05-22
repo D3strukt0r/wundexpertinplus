@@ -32,6 +32,10 @@ const ICON_SLOT = classNames(
   'transition-[translate,rotate,opacity] duration-300 ease-soft',
 );
 
+// The Moon and Sun slots cross-fade and rotate via the per-element
+// transitions on ICON_SLOT (translate/rotate/opacity are not inherited
+// properties, so no cascade-inherit flicker risk). The dark: variants
+// supply the target positions for each theme.
 const MOON_SLOT = 'translate-y-0 rotate-0 opacity-100 dark:translate-y-[120%] dark:rotate-[40deg] dark:opacity-0';
 const SUN_SLOT = '-translate-y-[120%] -rotate-[40deg] opacity-0 dark:translate-y-0 dark:rotate-0 dark:opacity-100';
 
