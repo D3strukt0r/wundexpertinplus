@@ -47,6 +47,17 @@ html {
     --header-bg: oklch(23.0% 5% 167.0deg);
   }
 
+  // No-JS + OS dark: matches the no-JS dark fallback selector in
+  // _tokens.scss (specificity 0,2,1) — without this rule, that
+  // translucent declaration outranks the :root opaque override above
+  // and the header bleeds through even under reduced-transparency.
+  // Source order wins at equal specificity, so this flips it to opaque.
+  @media (prefers-color-scheme: dark) {
+    html:not(.light):not(.dark) {
+      --header-bg: oklch(23.0% 5% 167.0deg);
+    }
+  }
+
   // Disable backdrop blur everywhere. With a solid header behind it the
   // blur has no visual effect anyway, and dropping it lightens compositing.
   *,
