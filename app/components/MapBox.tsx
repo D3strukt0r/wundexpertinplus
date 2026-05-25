@@ -1,10 +1,11 @@
+import {APIProvider, ControlPosition, Map, MapControl, Marker, useMapsLibrary} from '@vis.gl/react-google-maps';
 import classNames from 'classnames';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import markerUrl from '~/assets/brand/map-marker.svg?url';
 import SchematicMap from '~/assets/decor/schematic-map.svg?react';
 import {useTheme} from '~/hooks/useTheme';
-import {loadGoogleMaps, MAP_STYLES_DARK, MAP_STYLES_LIGHT, PRAXIS_COORDS, PRAXIS_PLACE_FTID} from '~/lib/google-maps';
+import {GOOGLE_MAPS_API_KEY, MAP_STYLES_DARK, MAP_STYLES_LIGHT, PRAXIS_COORDS, PRAXIS_PLACE_FTID} from '~/lib/google-maps';
 
 // Google Maps invokes this global when the API key is invalid or the
 // HTTP-Referer restriction rejects the current origin (e.g. on localhost,
@@ -22,112 +23,26 @@ const MAP_AUTH_FAIL_EVENT = 'wundexpertinplus:map-auth-failure';
 export function MapBox() {
   const {t} = useTranslation();
   const {theme} = useTheme();
-  const ref = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  // Initialise once. Re-apply styles on theme flip — never re-create the map.
   useEffect(() => {
-    let cancelled = false;
-
     const onAuthFail = () => {
-      if (cancelled) {
-        return;
-      }
       setFailed(true);
       setReady(false);
     };
     window.gm_authFailure = onAuthFail;
     window.addEventListener(MAP_AUTH_FAIL_EVENT, onAuthFail);
-
-    void loadGoogleMaps()
-      .then((maps) => {
-        if (cancelled || !ref.current) {
-          return;
-        }
-        const map = new maps.Map(ref.current, {
-          center: PRAXIS_COORDS,
-          zoom: 15,
-          styles: theme === 'dark' ? MAP_STYLES_DARK : MAP_STYLES_LIGHT,
-          disableDefaultUI: true,
-          zoomControl: true,
-          gestureHandling: 'cooperative',
-          clickableIcons: false,
-          keyboardShortcuts: false,
-        });
-        // eslint-disable-next-line no-new -- Marker registers itself with the map via constructor side-effect; no handle to retain.
-        new google.maps.Marker({
-          position: PRAXIS_COORDS,
-          map,
-          title: t('kontakt.praxis.map_pin_label'),
-          icon: {
-            url: markerUrl,
-            scaledSize: new google.maps.Size(40, 52),
-            anchor: new google.maps.Point(20, 50),
-          },
-        });
-
-        // Brand place-card overlay, top-left of the live map. Click opens
-        // the location in Google Maps via the official Maps URL schema
-        // (coords-only so it works without a Place ID). Children built
-        // with `textContent` rather than innerHTML so translation strings
-        // are never interpreted as HTML.
-        const card = document.createElement('a');
-        card.className = 'map-place-card';
-        // `ftid=` opens Google Maps on the actual business listing (not just
-        // a coordinate pin). No Places API enablement needed — the FID is
-        // recognised directly by Google Maps URLs.
-        card.href = `https://www.google.com/maps/place/?ftid=${PRAXIS_PLACE_FTID}`;
-        card.target = '_blank';
-        card.rel = 'noreferrer';
-        card.setAttribute('aria-label', `${t('brand.name')} — ${t('kontakt.praxis.map_card_link')}`);
-
-        const cardName = document.createElement('span');
-        cardName.className = 'map-place-card__name';
-        cardName.textContent = t('brand.name');
-
-        const cardAddr = document.createElement('span');
-        cardAddr.className = 'map-place-card__addr';
-        cardAddr.textContent = t('kontakt.praxis.map_label');
-
-        const cardLink = document.createElement('span');
-        cardLink.className = 'map-place-card__link';
-        cardLink.textContent = `${t('kontakt.praxis.map_card_link')} ↗`;
-
-        card.append(cardName, cardAddr, cardLink);
-        // `map.controls` is typed as a sparse array; the position slot always
-        // exists at runtime, but TypeScript can't prove it.
-        map.controls[google.maps.ControlPosition.TOP_LEFT]!.push(card);
-
-        mapRef.current = map;
-        setReady(true);
-      })
-      .catch(() => {
-        // Loader couldn't fetch the JS at all (network, CSP, …) — leave the
-        // fallback placeholder visible.
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
     return () => {
-      cancelled = true;
       window.removeEventListener(MAP_AUTH_FAIL_EVENT, onAuthFail);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme handled by separate effect below
   }, []);
-
-  useEffect(() => {
-    if (!mapRef.current) {
-      return;
-    }
-    mapRef.current.setOptions({styles: theme === 'dark' ? MAP_STYLES_DARK : MAP_STYLES_LIGHT});
-  }, [theme]);
 
   // Show the stylised placeholder both before the map resolves AND when the
   // API auth fails (localhost / restricted-key origins). The placeholder is
   // visually on-brand and keeps the address card from collapsing.
   const showFallback = !ready || failed;
+  const hasKey = GOOGLE_MAPS_API_KEY !== undefined && GOOGLE_MAPS_API_KEY !== '';
 
   return (
     <div className="relative h-50 md:h-60 border-b border-line overflow-hidden bg-map">
@@ -141,17 +56,76 @@ export function MapBox() {
             </div>
           )
         : null}
-      <div
-        ref={ref}
-        className={classNames('absolute inset-0 transition-opacity duration-500 ease', {
-          'opacity-100': ready && !failed,
-          'opacity-0': !ready || failed,
-          'invisible pointer-events-none': failed,
-        })}
-        role="application"
-        aria-label={t('kontakt.praxis.map_aria_label')}
-        aria-hidden={failed}
-      />
+      {hasKey
+        ? (
+            <div
+              className={classNames('absolute inset-0 transition-opacity duration-500 ease', {
+                'opacity-100': ready && !failed,
+                'opacity-0': !ready || failed,
+                'invisible pointer-events-none': failed,
+              })}
+              role="application"
+              aria-label={t('kontakt.praxis.map_aria_label')}
+              aria-hidden={failed}
+            >
+              <APIProvider apiKey={GOOGLE_MAPS_API_KEY!} libraries={['marker']} onError={() => setFailed(true)}>
+                <Map
+                  defaultCenter={PRAXIS_COORDS}
+                  defaultZoom={15}
+                  styles={theme === 'dark' ? MAP_STYLES_DARK : MAP_STYLES_LIGHT}
+                  disableDefaultUI
+                  zoomControl
+                  gestureHandling="cooperative"
+                  clickableIcons={false}
+                  keyboardShortcuts={false}
+                  onTilesLoaded={() => setReady(true)}
+                  className="w-full h-full"
+                >
+                  <PraxisMarker title={t('kontakt.praxis.map_pin_label')} />
+                  <MapControl position={ControlPosition.TOP_LEFT}>
+                    <a
+                      className="map-place-card"
+                      href={`https://www.google.com/maps/place/?ftid=${PRAXIS_PLACE_FTID}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`${t('brand.name')} — ${t('kontakt.praxis.map_card_link')}`}
+                    >
+                      <span className="map-place-card__name">{t('brand.name')}</span>
+                      <span className="map-place-card__addr">{t('kontakt.praxis.map_label')}</span>
+                      <span className="map-place-card__link">
+                        {t('kontakt.praxis.map_card_link')}
+                        {' '}
+                        ↗
+                      </span>
+                    </a>
+                  </MapControl>
+                </Map>
+              </APIProvider>
+            </div>
+          )
+        : null}
     </div>
+  );
+}
+
+// Marker icon needs `google.maps.Size` / `Point` constructors, which live in
+// the core library and only exist after the Maps JS loads.
+// `useMapsLibrary('core')` returns the namespace once available; render the
+// marker on the next tick.
+function PraxisMarker({title}: {title: string}) {
+  const core = useMapsLibrary('core');
+  if (!core) {
+    return null;
+  }
+  return (
+    <Marker
+      position={PRAXIS_COORDS}
+      title={title}
+      icon={{
+        url: markerUrl,
+        scaledSize: new core.Size(40, 52),
+        anchor: new core.Point(20, 50),
+      }}
+    />
   );
 }
