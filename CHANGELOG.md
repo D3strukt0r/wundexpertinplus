@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1](https://github.com/D3strukt0r/wundexpertinplus/compare/2.2.0...2.2.1) (2026-05-26)
+
+
+### 🐛 Bug Fixes
+
+* **a11y:** Close no-JS dark cascade gap under prefers-reduced-transparency ([4cf6ca6](https://github.com/D3strukt0r/wundexpertinplus/commit/4cf6ca6e194f3846191572a4105cc50720cacd52))
+* **build:** Serve site.webmanifest from vite dev server ([6382742](https://github.com/D3strukt0r/wundexpertinplus/commit/63827423c7246bd357b8e30ee45ab7caf70a7d03))
+* **styles:** Make theme crossfade correct at any duration ([2f0a0db](https://github.com/D3strukt0r/wundexpertinplus/commit/2f0a0db452f1333b36a886feb0a0c54862717398))
+* **workflows:** Use GH_PAT for Dependabot auto-merge to fire downstream workflows ([e653a3c](https://github.com/D3strukt0r/wundexpertinplus/commit/e653a3c7195bf49c119ba22345e2110614e54194))
+
+
+### ♻️ Refactoring
+
+* **maps:** Switch to [@vis](https://github.com/vis).gl/react-google-maps ([bd7067c](https://github.com/D3strukt0r/wundexpertinplus/commit/bd7067c125e7978342fef60fa24e2a3be9eb79bd))
+* **styles:** Centralise motion + dark-cascade tokens ([87ff861](https://github.com/D3strukt0r/wundexpertinplus/commit/87ff8616945c1cf70752b8ce89c6831a8467c4fc))
+
 ## [2.2.0](https://github.com/D3strukt0r/wundexpertinplus/compare/2.1.0...2.2.0) (2026-05-20)
 
 
