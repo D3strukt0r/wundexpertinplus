@@ -67,11 +67,11 @@ Two universal-selector blocks in `_base.scss` handle user preferences automatica
 
 ```
 app/styles/
-  tailwind.css          @theme tokens (colors, durations, easing, …) + @utility (container, transition-drawer) + @custom-variant (dark, no-js)
+  tailwind.css          @theme block (non-color tokens) + @theme inline (--color-* aliases) + @utility (container, duration-theme, duration-reveal, transition-drawer) + @custom-variant (dark, no-js)
   main.scss             @use index for the SCSS files below
   _mixins.scss          @mixin dark (top-level) + @mixin in-dark (nested with &) — both emit html.dark + no-JS prefers-color-scheme fallback
   _tokens.scss          oklch + motion CSS variables on :root, with @include dark { ... } for the dark cascade
-  _base.scss            resets, scroll-margin targets, body color-flip transition, global reduced-motion + reduced-transparency overrides
+  _base.scss            resets, scroll-margin targets, body bg-only transition, per-utility @layer base theme-transition rule, global reduced-motion + reduced-transparency overrides
   _animations.scss      html.js .reveal:not(.is-shown) gate only (transition lives on <Reveal>)
   _brand.scss           SVG brand-mark theme overrides (need higher specificity than the SVG's inline <style>)
   _nav.scss             :has(.site-nav__toggle:checked) morph rules + burger span transition
@@ -83,12 +83,36 @@ Whole SCSS surface is ~430 LoC across 8 files. Everything else is utilities on t
 
 **Design tokens** (`_tokens.scss`) are `oklch()` CSS variables on `:root` (light) with dark overrides emitted via `@include dark { ... }` (covers both `html.dark` and the no-JS `prefers-color-scheme` fallback). No hex / rgb / hsl anywhere in the SCSS (or in inline SVG fills). `tailwind.css` mirrors these as `--color-*` tokens inside `@theme` so utilities like `bg-paper`, `text-ink-soft`, `border-line` resolve via `var()` and follow the cascade at use-time. The `--color-*` aliases are declared ONLY at `:root`; redeclaring them inside the dark cascade is redundant because `var()` substitution happens at the consuming element's computed-value time.
 
-**Motion tokens** (`_tokens.scss` + `tailwind.css`) — three named durations own every transition in the project. Tune feel here, not at call sites:
-- `--motion-duration` (200ms) — UI hover/interaction feedback (buttons, nav links, burger, map card hover, etc.). Exposed as Tailwind utility `duration-motion`.
-- `--theme-transition` (400ms) — dark/light colour crossfade (global `body *` cascade in `_base.scss`) + MapBox tile fade. Utility: `duration-theme`.
-- `--reveal-duration` (700ms) — scroll-reveal entrance (`<Reveal>`). Utility: `duration-reveal`.
+**Motion tokens** (`_tokens.scss` + `tailwind.css`) — two named durations own every transition in the project. Tune feel here, not at call sites:
+- `--theme-transition` (400ms) — dark/light colour crossfade for every themed surface (page bg, headings, text, buttons, dividers, brand SVG fill, ThemeToggle icon swap, MapBox tile fade) plus the same duration on every hover transition (buttons, links, burger morph). One knob owns "how slow does the theme feel". Tested at 200ms / 400ms / 4s / 8s — all behave identically, just scaled.
+- `--reveal-duration` (700ms) — scroll-reveal entrance (`<Reveal>` fade + translateY).
 
-The `prefers-reduced-motion` global override in `_base.scss` flattens all three to 0.01ms regardless.
+Utility classes: `duration-theme` and `duration-reveal`. They're declared as explicit `@utility` blocks in `tailwind.css` — NOT as `@theme --duration-*` tokens. Tailwind v4 only mints `.duration-*` utilities from literal `<time>` values; a `var(--theme-transition)` reference is silently skipped (utility falls through to Tailwind's 150ms default, causing a 3-frame snap on theme flip).
+
+The `prefers-reduced-motion` global override in `_base.scss` flattens both to 0.01ms regardless.
+
+#### Theme crossfade mechanics
+
+Three rules in `_base.scss` drive the crossfade:
+
+1. **`body { transition: background-color var(--theme-transition) ease; }`** — body bg fades. `color` is **deliberately NOT in body's transition** because a `color` transition on body retargets every descendant's own `color` transition every frame against body's inherited animating colour, stalling them for the full window then playing back over a second window (~2× lag, visible as "icon stays bright while page goes dark, then quickly snaps at the end").
+2. **`@layer base { :is(.bg-bg, .bg-paper, …, .border-line, …) { transition: background-color, border-color }; .text-bg, .text-ink, …, .text-cta-dot { transition: color, background-color, border-color } }`** — per-utility, property-split. The `:is(...)` block targets every themed `bg-*` / `border-*` utility class WITHOUT `color` in its transition. The `.text-*` block (later in source order so it wins the shorthand for elements with both) transitions all three properties. Elements that only set a themed bg/border (sections, headers) don't drag `color` through, so they don't stall their text descendants.
+3. **`_brand.scss` `.brand-plaster__bg, .brand-plaster__strip-v { transition: fill … }`** — brand-mark SVG fills use **literal** `oklch(...)` values per theme rule (not `var(--…)`), so they need an element-level fill transition. Lives next to the `html.dark` / `html.light` rules that change those fills. **Do NOT add `transition: fill, stroke` on `body *`** — icon SVGs with `stroke="currentColor"` would retarget every frame against the parent's animating colour and lag ~8s.
+
+Reveal-style entrance wrappers handle the conflict differently: `.reveal` declares the full transition explicitly in `_animations.scss` with per-property durations (opacity + transform at `--reveal-duration`, `border-color` at `--theme-transition`) — so the divide-line borders animate at theme speed even though the Reveal wrapper itself is on the entrance timing.
+
+`[&_em]:text-green` (Tailwind variant on `<h1>` / `<h2>`) paints `color: var(--green)` on the descendant `<em>` via a child selector, with no transition declared. Adding `transition: color` to the em retargets against the heading's own `color` transition (~8s lag). Workaround in `_base.scss`:
+
+```scss
+[class*="[&_em]:text-green"] em {
+  -webkit-text-fill-color: var(--green);
+  transition: -webkit-text-fill-color var(--theme-transition) ease;
+}
+```
+
+`-webkit-text-fill-color` is a different property than the parent's transitioning `color`, so Chrome doesn't retarget. `currentColor` doesn't trigger transitions (it's a keyword, not a typed colour value), so reference the variable directly.
+
+Same idea, different element: `[&_strong]:text-ink` paints `color: var(--ink)` on `<strong>` (used inside `text-ink-soft` paragraphs). Same rule below the em one, with `var(--ink)`.
 
 **Two dark-cascade mixins** in `_mixins.scss`:
 - `@include dark { ... }` — **top-level** form. Use at root scope to declare a whole block of dark-mode rules (the token cascade, the reduced-transparency `--header-bg` override). Emits `html.dark { ... }` + the no-JS `prefers-color-scheme: dark` fallback.
@@ -130,7 +154,8 @@ Nothing favicon-related is committed — it's all regenerated each build.
 
 - **Routing-aware** — menu links and the brand logo use **react-router `<Link>`**, not `<a>`. Hrefs are stored in `de.yml` as absolute paths-with-hash (`/#leistungen`) so SPA navigation works from any route. A bare `#leistungen` would make react-router resolve relative to the current pathname (`/test#leistungen` from `/test`).
 - **Breakpoints** — mobile drawer below Tailwind's `lg` (1024px), full menu at ≥`lg`. LinkedIn icon is hidden 1024–1279px (`max-xl:hidden`) so the row doesn't crowd in the narrow-desktop range; shown ≥1280px alongside the phone CTA and theme toggle. In the mobile drawer, LinkedIn is a separate row below the phone CTA.
-- **Burger morph** — base styles (block / width / height / bg / origin) live as utilities on each `<span>` in `Nav.tsx`. The `:has(.site-nav__toggle:checked)` rules in `_nav.scss` apply the transform/opacity that morphs the three lines into an X. **The transition stays in SCSS** because Tailwind's `transition-transform` and `transition-opacity` each set a single `transition-property`, which would override the global `body *` color-flip transition (theme toggle would then snap the burger color instead of fading it).
+- **Burger morph** — base styles (block / width / height / bg / origin) live as utilities on each `<span>` in `Nav.tsx`. The `:has(.site-nav__toggle:checked)` rules in `_nav.scss` apply the transform/opacity that morphs the three lines into an X. The transition stays in SCSS (transform at `var(--theme-transition)`, opacity at half) — the burger's bg/color are themed and pick up the per-utility `@layer base` rule via the `bg-ink` class on each span.
+- **Header (`.site-nav`) transition exception** — the header has `bg-header backdrop-blur-md border-b border-line` and no themed `text-*` of its own. A dedicated `.site-nav { transition: background-color, border-color }` rule outside `@layer base` overrides the per-utility shorthand to drop `color` — keeps the descendant ThemeToggle button + menu links from being stalled by an inherited-colour transition on their header ancestor.
 - **Drawer** — base styles as utilities (`absolute top-full inset-x-0 max-h-0 overflow-hidden bg-paper transition-drawer lg:hidden`); the open rule (`:has(:checked) .site-nav__drawer { max-height + borders }`) stays in SCSS for the same `:has()` reason. `transition-drawer` is a custom `@utility` so we don't need arbitrary `transition-[max-height]`.
 
 ### Vite plugins
@@ -207,3 +232,10 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 - **i18n init is guarded by `isInitialized`.** Changing options in `i18n.ts` requires a full dev-server restart (HMR can't re-run init). YAML *content* changes hot-reload via the `import.meta.hot.accept` hook in the same file.
 - **Don't write `html.dark` or `html.dark &` directly in SCSS** — use `@include dark { ... }` (top-level) or `@include in-dark { ... }` (nested) so the no-JS `prefers-color-scheme` fallback selector is emitted too.
 - **Don't redeclare Tailwind `--color-*` aliases under `@include dark`** — they're already declared once at `:root` as `var(--paper)` etc., and `var()` resolves at the consuming element. Redeclaring is pure noise (empirically verified against the live page).
+- **`--color-*` must be `@theme inline`, not regular `@theme`.** The regular block sometimes serves a stale alias through the chain during a transition (visible as text snapping mid-animation back to the old palette). `@theme inline { --color-ink: var(--ink); }` makes Tailwind emit `.text-ink { color: var(--ink); }` directly, no alias indirection.
+- **Body MUST NOT transition `color`.** A `color` transition on body retargets every descendant's own `color` transition every frame → ~2× lag visible as "icon stays bright then snaps dark at the end". Only `background-color` on body. Color transitions are declared per element via the `@layer base` per-utility rule.
+- **`@layer base` per-utility transition rule is property-split.** `:is(.bg-*, .border-*)` gets bg + border only; `.text-*` gets color + bg + border. Order matters: `:text-*` rule is LAST so elements with both `text-*` AND `bg-*` win the cascade and get the full transition list. Headers / sections / wrappers that only set `bg-*` / `border-*` don't drag `color` through and don't stall their themed text descendants.
+- **`duration-theme` / `duration-reveal` are explicit `@utility` blocks, not `@theme --duration-*` tokens.** Tailwind v4 only mints `.duration-*` utilities from literal `<time>` values; a `var(--theme-transition)` reference is silently skipped and the utility falls through to Tailwind's 150ms default. Symptom: a class change to `duration-theme` makes themed properties snap in three frames instead of crossfading.
+- **Don't put `transition: fill, stroke` on `body *`.** Icon SVGs use `stroke="currentColor"`; a per-element stroke transition on them retargets against the parent's animating `color` every frame, causing the visible "icon stays bright then snaps dark at the end" lag (~8s on a 4s transition). The brand-mark SVG fills get their own transition in `_brand.scss` because they use literal `oklch(...)` per theme — those literal-fill elements are the only ones that actually need a fill transition.
+- **Tailwind's bare `transition` utility (and `transition-colors`) eats themed properties from the shorthand.** Reveal's `transition-[opacity,transform] duration-reveal` would drop `border-color` even though descendants need it for the divide-line animation. `.reveal` declares the full transition explicitly in `_animations.scss` with per-property durations. Same pattern for the Result panel in webcenter / similar wrappers — declare the multi-property transition in CSS, not via a Tailwind shorthand utility.
+- **`[&_<child>]:text-<themed>` variants paint colour on a descendant but no transition.** Animating the descendant's `color` directly retargets against the parent's `color` transition. Workaround: paint via `-webkit-text-fill-color: var(--themed)` (different property than `color`, no retargeting) and transition that. See the em + strong rules in `_base.scss`.

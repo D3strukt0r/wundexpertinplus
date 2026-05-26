@@ -1,9 +1,25 @@
 // Reveal entrance animation — progressive enhancement.
 // No-JS users see content immediately (no html.js → no hidden state).
 // With JS, the initial state is hidden; useReveal flips `.is-shown` when
-// the element scrolls into view. The transition itself lives on Reveal.tsx
-// as Tailwind utilities (transition duration-700 ease-soft).
+// the element scrolls into view.
 html.js .reveal:not(.is-shown) {
   opacity: 0;
   transform: translateY(0.875rem);
+}
+
+// Reveal element transitions: opacity + transform for the entrance, plus
+// `border-color` to follow the theme crossfade. The border-color entry is
+// here (not in `.reveal`'s Tailwind className) because Tailwind's bare
+// `transition-[…]` utility sets the whole shorthand and we need per-
+// property durations: opacity/transform at --reveal-duration, border-color
+// at --theme-transition. This rule's specificity (single class) matches
+// the Tailwind utility's, and since it appears later in the cascade, it
+// wins. Reveal sets `transition-delay` inline for the staggered entrance,
+// which applies to all listed properties (slight delay on border-color is
+// acceptable — divide-line borders only animate during theme flip).
+.reveal {
+  transition:
+    opacity      var(--reveal-duration)  var(--ease-soft),
+    transform    var(--reveal-duration)  var(--ease-soft),
+    border-color var(--theme-transition) ease;
 }

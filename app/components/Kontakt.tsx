@@ -31,7 +31,7 @@ function Tile({href, external, icon, label, value, emailLike}: TileProps) {
       className={classNames(
         'flex items-center gap-3.5 py-stack px-5 md:gap-stack md:py-stack-lg md:px-7',
         'bg-paper-fixed/[0.06] border border-paper-fixed/[0.18] rounded-md text-paper-fixed no-underline',
-        'transition-[background,border-color] duration-motion ease',
+        'transition-[background,border-color] duration-theme ease',
         'hover:bg-paper-fixed/[0.1] hover:border-paper-fixed/[0.3]',
       )}
     >
@@ -130,17 +130,17 @@ export function Kontakt() {
           <Reveal delay={200}>
             <article className="bg-paper text-ink rounded-md overflow-hidden">
               <MapBox />
-              <div className="p-stack-lg pb-6 md:pt-8 px-9 pb-10 text-ink">
+              <div className="p-stack-lg pb-6 md:pt-8 px-9 pb-10">
                 <div className="text-xs tracking-eyebrow-wide uppercase text-green font-semibold mb-2.5">
                   {t('kontakt.praxis.eyebrow')}
                 </div>
-                <h3 className="font-serif font-normal text-xl md:text-2xl text-ink leading-tight m-0">
+                <h3 className="font-serif font-normal text-xl md:text-2xl leading-tight m-0">
                   {t('kontakt.praxis.partner')}
                 </h3>
                 <p className="text-sm text-ink-soft m-0 mt-1 italic">
                   {t('kontakt.praxis.sub')}
                 </p>
-                <address className="mt-7 text-sm md:text-base leading-relaxed text-ink not-italic [&_div]:block">
+                <address className="mt-7 text-sm md:text-base leading-relaxed not-italic [&_div]:block">
                   {address.map((line) => (
                     <div key={line}>{line}</div>
                   ))}

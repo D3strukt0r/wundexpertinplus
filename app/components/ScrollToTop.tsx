@@ -22,7 +22,7 @@ const BASE = classNames(
   // the modern `translate` CSS property, so the transition list has to
   // name it explicitly. Opacity uses the same 0.25s ease curve as the
   // slide so the fade and slide settle together.
-  'transition-[opacity,translate,background-color,border-color,color] duration-300 ease-soft',
+  'transition-[opacity,translate,background-color,border-color,color] duration-theme ease-soft',
   'hover:bg-bg-deep hover:border-ink-soft',
   'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
   // Hide when JS hasn't loaded — the visibility logic lives in React.

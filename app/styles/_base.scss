@@ -95,23 +95,80 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  // Body only transitions `background-color`. Putting `color` on body's
+  // transition makes every descendant with its own `color: var(--ink…)` +
+  // a `color` transition stall — Chrome re-targets the descendant's
+  // animation every frame against the body's animating inherited colour,
+  // so the descendant transition trickles over ~2× the intended duration.
+  // Color transitions are declared per element via the `text-*` per-utility
+  // rule below; descendants without a themed `text-*` will snap (body's
+  // color is `var(--ink)`, which changes instantly).
+  transition: background-color var(--theme-transition) ease;
 }
 
-// Theme flip: cascade a soft cross-fade through everything that consumes the
-// tokens. Targeted properties only — avoids the cost of all-property
-// transitions on every element. Wrapped in `@layer base` so Tailwind
-// utilities (e.g. `transition-[translate,rotate]` on the theme toggle's
-// icon swap) can override on specific elements that need other transition
-// properties; without the layer, non-layered rules trump every utility.
+// Theme-flip transitions: elements that explicitly set a themed colour
+// utility (`text-ink`, `bg-paper`, `border-line`, …) transition their own
+// color / background-color / border-color. Elements without a themed
+// utility match no selector here and stay un-transitioned, so they inherit
+// smoothly from an animating ancestor without re-targeting each frame
+// (which was the sawtooth that motivated the earlier @property attempt).
+// `text-tan`, `text-green-fixed`, `text-paper-fixed`, `text-tan-fixed` are
+// excluded — those tokens don't change between themes.
+//
+// SVG brand-mark fills get their own transition rule in `_brand.scss` next
+// to the literal `oklch(…)` declarations they animate. We intentionally do
+// NOT declare `transition: fill, stroke` on `body *` here — icon SVGs use
+// `stroke="currentColor"` (resolved to the inherited animating colour) and
+// a per-element transition on `stroke` makes Chrome re-target every frame
+// against the parent's animating colour, causing the visible "icon stays
+// bright then snaps dark at the end" lag (~8s on a 4s transition).
 @layer base {
-  body,
-  body * {
+  // Elements with ONLY a themed bg-* or border-* class (no text-*): just
+  // transition bg + border, NOT color. Including `color` here would make
+  // these elements (e.g. a `<section class="bg-paper border-line">` that
+  // inherits its colour from body) run a 4s `color` animation triggered by
+  // body's snap, which then stalls any descendant `color` transitions via
+  // Chrome's per-frame retargeting.
+  :is(.bg-bg, .bg-bg-deep, .bg-paper, .bg-ink, .bg-ink-soft,
+      .bg-green, .bg-green-soft, .bg-tan-deep,
+      .bg-line, .bg-header, .bg-map, .bg-on-primary, .bg-cta-dot,
+      .border-bg, .border-bg-deep, .border-paper, .border-ink, .border-ink-soft,
+      .border-green, .border-green-soft, .border-tan-deep, .border-line) {
     transition:
       background-color var(--theme-transition) ease,
-      color var(--theme-transition) ease,
-      border-color var(--theme-transition) ease,
-      fill var(--theme-transition) ease,
-      stroke var(--theme-transition) ease;
+      border-color     var(--theme-transition) ease;
+  }
+
+  // Elements with a themed text-* class: transition all three (color, bg,
+  // border). This rule comes AFTER the :is() block above so for elements
+  // with both `text-*` AND `bg-*`/`border-*` (e.g. Kontakt article's
+  // `bg-paper text-ink`), this wins and they get the full transition list.
+  .text-bg, .text-bg-deep, .text-paper, .text-ink, .text-ink-soft,
+  .text-green, .text-green-soft, .text-tan-deep,
+  .text-on-primary, .text-cta-dot {
+    transition:
+      color            var(--theme-transition) ease,
+      background-color var(--theme-transition) ease,
+      border-color     var(--theme-transition) ease;
+  }
+
+  // Tailwind's `[&_<child>]:text-<themed>` variant paints `color: var(--…)`
+  // on a descendant element via a child selector. If we transition the
+  // descendant's `color` directly, Chrome stalls it against the parent's
+  // own `color` transition (~8s lag from retargeting). Paint via
+  // `-webkit-text-fill-color` instead — a different property than the
+  // parent's transitioning `color`, so Chrome doesn't retarget. (Keyword
+  // `currentColor` doesn't trigger transitions, so reference the variable
+  // directly.) Add a new rule below for each combination of element + token.
+  // `[&_em]:text-tan-fixed` (Kontakt) is a fixed token that doesn't change,
+  // so it doesn't need a rule.
+  [class*="[&_em]:text-green"] em {
+    -webkit-text-fill-color: var(--green);
+    transition: -webkit-text-fill-color var(--theme-transition) ease;
+  }
+  [class*="[&_strong]:text-ink"] strong {
+    -webkit-text-fill-color: var(--ink);
+    transition: -webkit-text-fill-color var(--theme-transition) ease;
   }
 }
 

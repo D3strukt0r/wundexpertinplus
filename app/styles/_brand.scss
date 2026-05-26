@@ -13,3 +13,13 @@ html.light {
   .brand-plaster__bg      { fill: oklch(95.4% 3.25% 82.4deg); }
   .brand-plaster__strip-v { fill: oklch(38.2% 10.25% 166.3deg); }
 }
+
+// Crossfade fills on theme flip. Lives here next to the literal `oklch(…)`
+// values, not in `_base.scss`'s `body *`, because the broad selector also
+// applied to icon SVGs that use `stroke="currentColor"`, where a per-
+// element stroke transition re-targets every frame against the inherited
+// animating colour and lags behind the page (~8s on a 4s transition).
+.brand-plaster__bg,
+.brand-plaster__strip-v {
+  transition: fill var(--theme-transition) ease;
+}

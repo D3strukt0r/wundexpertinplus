@@ -64,13 +64,13 @@
   // the dark canvas in dark mode where the pill turns light sage.
   --cta-dot-bg: var(--tan);
 
-  // Motion timings. Three named tokens own every transition duration in the
-  // project — tune feel here, not at call sites. `--motion-duration` covers
-  // UI hover/interaction feedback; `--theme-transition` covers the dark/
-  // light colour crossfade and the slow MapBox tile fade; `--reveal-duration`
-  // covers the scroll-reveal entrance.
-  --motion-duration: 200ms;
-  --theme-transition: 400ms;
+  // Motion timings. Two named tokens own every transition duration in the
+  // project — tune feel here, not at call sites. `--theme-transition` covers
+  // the dark/light colour crossfade plus UI hover/interaction feedback (burger
+  // morph, hover effects on themed and fixed-paper surfaces — same duration
+  // means everything settles together). `--reveal-duration` covers the
+  // scroll-reveal entrance.
+  --theme-transition: 200ms;
   --reveal-duration: 700ms;
 
   color-scheme: light;

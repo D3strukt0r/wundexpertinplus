@@ -13,7 +13,7 @@ interface Props {
 const BUTTON = classNames(
   'inline-flex items-center justify-center shrink-0 relative overflow-hidden',
   'rounded-full border border-line bg-transparent text-ink cursor-pointer',
-  'transition-[background,border-color,color] duration-motion ease',
+  'transition-[background,border-color,color] duration-theme ease',
   'hover:bg-bg-deep hover:border-ink-soft',
   'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
   // No JS = no meaningful click target.
@@ -29,7 +29,7 @@ const BUTTON = classNames(
 // properties, so the transition list must name them directly.
 const ICON_SLOT = classNames(
   'absolute inline-flex',
-  'transition-[translate,rotate,opacity] duration-300 ease-soft',
+  'transition-[translate,rotate,opacity] duration-theme ease-soft',
 );
 
 const MOON_SLOT = 'translate-y-0 rotate-0 opacity-100 dark:translate-y-[120%] dark:rotate-[40deg] dark:opacity-0';
