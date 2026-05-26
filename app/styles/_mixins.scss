@@ -1,12 +1,32 @@
-// `@include dark { ... }` emits TWO selectors:
-//   1. `html.dark &` — when the inline theme bootstrap set the dark class
-//      (JS executed, user/OS prefers dark)
-//   2. `@media (prefers-color-scheme: dark) html:not(.dark):not(.light) &`
-//      — no-JS fallback: bootstrap never ran, so we trust the OS hint
+// Dark-cascade mixins. Both cover the JS path (`html.dark`) AND the no-JS
+// fallback (`@media (prefers-color-scheme: dark)` on `html:not(.dark):not(.light)`,
+// i.e. the bootstrap script never ran so we trust the OS hint).
+
+// Top-level form. Use at the root to declare a block of dark-mode rules —
+// typically the dark token cascade, or a whole rule that only exists in dark.
 //
-// Use this anywhere a rule needs to fire in dark mode, instead of writing
-// `html.dark &` directly — that selector misses the no-JS path.
+//   @include dark {
+//     :root { --bg: oklch(…); }
+//   }
 @mixin dark {
+  html.dark {
+    @content;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not(.dark):not(.light) {
+      @content;
+    }
+  }
+}
+
+// Nested form. Use INSIDE an existing rule when only that rule needs a
+// dark-mode override. Emits `html.dark &` plus the no-JS fallback.
+//
+//   .my-component {
+//     color: var(--ink);
+//     @include in-dark { color: var(--ink-bright); }
+//   }
+@mixin in-dark {
   html.dark & {
     @content;
   }

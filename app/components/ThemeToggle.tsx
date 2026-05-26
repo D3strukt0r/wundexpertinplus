@@ -13,7 +13,7 @@ interface Props {
 const BUTTON = classNames(
   'inline-flex items-center justify-center shrink-0 relative overflow-hidden',
   'rounded-full border border-line bg-transparent text-ink cursor-pointer',
-  'transition-[background,border-color,color] duration-200 ease',
+  'transition-[background,border-color,color] duration-motion ease',
   'hover:bg-bg-deep hover:border-ink-soft',
   'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
   // No JS = no meaningful click target.

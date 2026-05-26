@@ -56,6 +56,14 @@
 
   /* Soft easing curve used across hover/transition effects. */
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Tailwind v4 reads `--duration-*` to mint `duration-motion` /
+     `duration-theme` / `duration-reveal` utilities. Aliases route through
+     the runtime CSS vars in _tokens.scss so tuning one place updates JSX
+     and SCSS together. */
+  --duration-motion: var(--motion-duration);
+  --duration-theme:  var(--theme-transition);
+  --duration-reveal: var(--reveal-duration);
 }
 
 /* Semantic CSS variables consumed via var(...) in SCSS.

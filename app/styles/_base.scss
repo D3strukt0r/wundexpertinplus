@@ -1,5 +1,7 @@
 // Global resets + document-level rules.
 
+@use 'mixins' as *;
+
 * {
   box-sizing: border-box;
 }
@@ -43,19 +45,13 @@ html {
   :root {
     --header-bg: oklch(95.4% 3.25% 82.4deg);
   }
-  html.dark {
-    --header-bg: oklch(23.0% 5% 167.0deg);
-  }
 
-  // No-JS + OS dark: matches the no-JS dark fallback selector in
-  // _tokens.scss (specificity 0,2,1) — without this rule, that
-  // translucent declaration outranks the :root opaque override above
-  // and the header bleeds through even under reduced-transparency.
-  // Source order wins at equal specificity, so this flips it to opaque.
-  @media (prefers-color-scheme: dark) {
-    html:not(.light):not(.dark) {
-      --header-bg: oklch(23.0% 5% 167.0deg);
-    }
+  // Dark override needs to win over the translucent declarations in
+  // _tokens.scss at equal specificity — the `dark` mixin emits the
+  // `html.dark` rule plus the no-JS `prefers-color-scheme: dark` fallback,
+  // and source order (this rule comes later) flips both to opaque.
+  @include dark {
+    --header-bg: oklch(23.0% 5% 167.0deg);
   }
 
   // Disable backdrop blur everywhere. With a solid header behind it the
@@ -111,11 +107,11 @@ body {
   body,
   body * {
     transition:
-      background-color 0.4s ease,
-      color 0.4s ease,
-      border-color 0.4s ease,
-      fill 0.4s ease,
-      stroke 0.4s ease;
+      background-color var(--theme-transition) ease,
+      color var(--theme-transition) ease,
+      border-color var(--theme-transition) ease,
+      fill var(--theme-transition) ease,
+      stroke var(--theme-transition) ease;
   }
 }
 

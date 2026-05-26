@@ -17,7 +17,7 @@ interface NavLink {
 const ICON_BUTTON = classNames(
   'inline-flex items-center justify-center shrink-0 no-underline',
   'w-9 h-9 rounded-full border border-line bg-transparent text-ink',
-  'transition-[background,border-color,color] duration-200 ease',
+  'transition-[background,border-color,color] duration-motion ease',
   'hover:bg-bg-deep hover:border-ink-soft',
   'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
 );
@@ -92,7 +92,7 @@ export function Nav() {
             <Link
               key={link.href}
               to={link.href}
-              className="text-ink-soft no-underline text-sm tracking-eyebrow-tight uppercase font-medium whitespace-nowrap transition-colors duration-150 ease hover:text-ink"
+              className="text-ink-soft no-underline text-sm tracking-eyebrow-tight uppercase font-medium whitespace-nowrap transition-colors duration-motion ease hover:text-ink"
             >
               {link.label}
             </Link>
@@ -180,7 +180,7 @@ export function Nav() {
             onClick={() => {
               setOpen(false);
             }}
-            className="mt-3.5 inline-flex items-center justify-center gap-2.5 text-ink-soft text-sm tracking-wider no-underline py-1.5 px-3 transition-colors duration-150 ease hover:text-ink"
+            className="mt-3.5 inline-flex items-center justify-center gap-2.5 text-ink-soft text-sm tracking-wider no-underline py-1.5 px-3 transition-colors duration-motion ease hover:text-ink"
           >
             <LinkedInIcon width={16} height={16} aria-hidden="true" />
             <span>{t('contact.linkedin_label')}</span>

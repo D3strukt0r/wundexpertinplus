@@ -59,7 +59,7 @@ export function MapBox() {
       {hasKey
         ? (
             <div
-              className={classNames('absolute inset-0 transition-opacity duration-500 ease', {
+              className={classNames('absolute inset-0 transition-opacity duration-theme ease', {
                 'opacity-100': ready && !failed,
                 'opacity-0': !ready || failed,
                 'invisible pointer-events-none': failed,

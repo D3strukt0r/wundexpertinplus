@@ -1,15 +1,15 @@
-// Burger-line transition. Combines the morph timing (transform 0.25s for
-// spans 1/3, opacity 0.15s for span 2) with the global theme-flip timings
-// (background-color/color 0.4s). Lives in CSS because Tailwind's
+// Burger-line transition. Combines the morph timing (transform/opacity via
+// --motion-duration) with the global theme-flip timings (background-color/
+// color via --theme-transition). Lives in CSS because Tailwind's
 // transition-* utilities each set a single transition-property, which
 // would override the global `body *` color-flip rule and make the burger
 // snap instead of fade on theme toggle.
 .site-nav__burger span {
   transition:
-    transform 0.25s ease,
-    opacity 0.15s ease,
-    background-color 0.4s,
-    color 0.4s;
+    transform var(--motion-duration) ease,
+    opacity calc(var(--motion-duration) / 2) ease,
+    background-color var(--theme-transition),
+    color var(--theme-transition);
 }
 
 // Drawer state morph + hamburger→X transform. Driven by :has() so the

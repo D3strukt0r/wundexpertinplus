@@ -1,6 +1,8 @@
 // Design tokens — palette + type.
-// Light is default; `html.dark` flips the runtime variables. Component rules
-// consume the variables only — never the raw colour literals.
+// Light is default; the `dark` mixin flips the runtime variables under both
+// `html.dark` (JS path) and `prefers-color-scheme: dark` on unset html
+// (no-JS path). Component rules consume the variables only — never the raw
+// colour literals.
 //
 // Theme class lives on <html> (not <body>) so the bootstrap script can set
 // it from <head> before any stylesheet evaluates — see `themeBootstrap` in
@@ -14,13 +16,14 @@
 // Kontakt section stays dark-green-with-cream type in both modes so the
 // cream-on-green CTAs inside keep their identity.
 //
-// On the `--color-X: var(--X)` alias lines: Tailwind v4's `@theme` block in
-// tailwind.css declares `--color-paper: var(--paper)` only at `:root` scope.
-// CSS custom-property values are *computed at the declaring element*, so
-// without redeclaring `--color-paper` at every theme scope, `var(--paper)`
-// would always resolve at `:root` (= light) regardless of any descendant
-// override. We redeclare each alias inside `html.dark` (and the no-JS
-// `prefers-color-scheme` fallback) so the `var()` re-resolves there.
+// The Tailwind `--color-*` aliases (defined in tailwind.css `@theme` as
+// `--color-paper: var(--paper)` etc.) only need declaring at `:root` — they
+// don't need a per-scope redeclaration inside the dark cascade. `var()`
+// substitution happens at the consuming element's computed-value time, so
+// at any descendant of `html.dark`, `var(--color-paper)` resolves through
+// the cascaded (dark) value of `--paper`.
+
+@use 'mixins' as *;
 
 :root {
   --bg:           oklch(95.4% 3.25% 82.4deg);
@@ -61,10 +64,21 @@
   // the dark canvas in dark mode where the pill turns light sage.
   --cta-dot-bg: var(--tan);
 
+  // Motion timings. Three named tokens own every transition duration in the
+  // project — tune feel here, not at call sites. `--motion-duration` covers
+  // UI hover/interaction feedback; `--theme-transition` covers the dark/
+  // light colour crossfade and the slow MapBox tile fade; `--reveal-duration`
+  // covers the scroll-reveal entrance.
+  --motion-duration: 200ms;
+  --theme-transition: 400ms;
+  --reveal-duration: 700ms;
+
   color-scheme: light;
 }
 
-html.dark {
+// Dark cascade — covers both `html.dark` (JS path) and the no-JS fallback
+// `@media (prefers-color-scheme: dark)` on unset html. See `_mixins.scss`.
+@include dark {
   --bg:           oklch(23.0% 5% 167.0deg);
   --paper:        oklch(27.8% 5.75% 162.7deg);
   --ink:          oklch(92.3% 5.25% 85.9deg);
@@ -84,69 +98,5 @@ html.dark {
   --ueber-portrait-filter: saturate(0.72) contrast(0.96) brightness(0.88);
   --cta-dot-bg: var(--bg);
 
-  // Redeclare the Tailwind `--color-*` aliases at this scope so their
-  // var(--*) right-hand-side resolves to the dark values, not the :root
-  // light values.
-  --color-bg:         var(--bg);
-  --color-bg-deep:    var(--bg-deep);
-  --color-paper:      var(--paper);
-  --color-ink:        var(--ink);
-  --color-ink-soft:   var(--ink-soft);
-  --color-green:      var(--green);
-  --color-green-soft: var(--green-soft);
-  --color-tan:        var(--tan);
-  --color-tan-deep:   var(--tan-deep);
-  --color-line:       var(--line);
-  --color-header:     var(--header-bg);
-  --color-map:        var(--map-bg);
-  --color-shadow:     var(--shadow-soft);
-  --color-on-primary: var(--on-primary);
-  --color-cta-dot:    var(--cta-dot-bg);
-
   color-scheme: dark;
-}
-
-// No-JS fallback: the themeBootstrap script never runs, so <html> has neither
-// `.light` nor `.dark`. Honour the OS's prefers-color-scheme by applying the
-// dark overrides under that media query as long as the user hasn't explicitly
-// chosen light (which they can't without JS, so this is always when no JS).
-@media (prefers-color-scheme: dark) {
-  html:not(.light):not(.dark) {
-    --bg:           oklch(23.0% 5% 167.0deg);
-    --paper:        oklch(27.8% 5.75% 162.7deg);
-    --ink:          oklch(92.3% 5.25% 85.9deg);
-    --ink-soft:     oklch(74.8% 5.5% 88.8deg);
-    --green:        oklch(79.5% 9.5% 160.4deg);
-    --green-soft:   oklch(70.2% 11% 160.4deg);
-    --tan:          oklch(78.9% 9% 78.6deg);
-    --tan-deep:     oklch(81.4% 12.25% 78.3deg);
-    --line:         oklch(92.3% 5.25% 85.9deg / 0.16);
-    --header-bg:    oklch(23.0% 5% 167.0deg / 0.88);
-    --map-bg:       oklch(25.2% 4.5% 165.4deg);
-    --shadow-soft:  oklch(0% 0% 0deg / 0.5);
-    --bg-deep:      oklch(25.5% 5% 162.9deg);
-
-    --on-primary: var(--bg);
-    --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);
-    --ueber-portrait-filter: saturate(0.72) contrast(0.96) brightness(0.88);
-    --cta-dot-bg: var(--bg);
-
-    --color-bg:         var(--bg);
-    --color-bg-deep:    var(--bg-deep);
-    --color-paper:      var(--paper);
-    --color-ink:        var(--ink);
-    --color-ink-soft:   var(--ink-soft);
-    --color-green:      var(--green);
-    --color-green-soft: var(--green-soft);
-    --color-tan:        var(--tan);
-    --color-tan-deep:   var(--tan-deep);
-    --color-line:       var(--line);
-    --color-header:     var(--header-bg);
-    --color-map:        var(--map-bg);
-    --color-shadow:     var(--shadow-soft);
-    --color-on-primary: var(--on-primary);
-    --color-cta-dot:    var(--cta-dot-bg);
-
-    color-scheme: dark;
-  }
 }

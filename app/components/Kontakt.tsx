@@ -31,7 +31,7 @@ function Tile({href, external, icon, label, value, emailLike}: TileProps) {
       className={classNames(
         'flex items-center gap-3.5 py-stack px-5 md:gap-stack md:py-stack-lg md:px-7',
         'bg-paper-fixed/[0.06] border border-paper-fixed/[0.18] rounded-md text-paper-fixed no-underline',
-        'transition-[background,border-color] duration-200 ease',
+        'transition-[background,border-color] duration-motion ease',
         'hover:bg-paper-fixed/[0.1] hover:border-paper-fixed/[0.3]',
       )}
     >

@@ -25,7 +25,7 @@ export function Reveal({delay = 0, as: Tag = 'div', className, style, children}:
       // which no single ref can satisfy. The ref is consumed by
       // IntersectionObserver, which doesn't care about the element type.
       ref={ref as Ref<HTMLElement & HTMLLIElement & HTMLParagraphElement>}
-      className={classNames('reveal transition duration-700 ease-soft', {'is-shown': shown}, className)}
+      className={classNames('reveal transition duration-reveal ease-soft', {'is-shown': shown}, className)}
       style={{transitionDelay: `${delay}ms`, ...style}}
     >
       {children}

@@ -41,7 +41,7 @@ In-page anchors (`#leistungen`, etc.) drive section navigation. Nav targets come
 
 `useTheme` returns `[theme, setTheme]`. Sets `html.light` / `html.dark` for CSS variable cascades. Persists to `localStorage['wundexpertinplus:theme']` and falls back to `prefers-color-scheme`. An inline `themeBootstrap` IIFE in `root.tsx` runs in `<head>` (before stylesheets evaluate) so the first paint matches the stored choice — no FOUC and no cross-fade animation. The same IIFE adds `html.js` — see the no-JS section below for what that gates. The class is on `<html>` (not `<body>`) so the script can run during head parsing, before `<body>` even exists.
 
-If JS is disabled, `<html>` has neither `.light` nor `.dark`. `_tokens.scss` mirrors the dark token values inside `@media (prefers-color-scheme: dark) html:not(.light):not(.dark) { ... }` so the OS preference still drives the palette.
+If JS is disabled, `<html>` has neither `.light` nor `.dark`. The `dark` mixin in `_tokens.scss` emits both `html.dark { ... }` and `@media (prefers-color-scheme: dark) html:not(.dark):not(.light) { ... }`, so the OS preference still drives the palette without JS.
 
 The **Kontakt** section is intentionally dark-green in both modes — its CTAs reference `--green-fixed` / `--paper-fixed`, not the themed `--green` / `--paper` tokens.
 
@@ -67,10 +67,10 @@ Two universal-selector blocks in `_base.scss` handle user preferences automatica
 
 ```
 app/styles/
-  tailwind.css          @theme tokens + @utility (container, transition-drawer) + @custom-variant (dark, no-js)
+  tailwind.css          @theme tokens (colors, durations, easing, …) + @utility (container, transition-drawer) + @custom-variant (dark, no-js)
   main.scss             @use index for the SCSS files below
-  _mixins.scss          @mixin dark (emits html.dark & + no-JS prefers-color-scheme fallback)
-  _tokens.scss          oklch CSS variables (:root + html.dark + no-JS @media)
+  _mixins.scss          @mixin dark (top-level) + @mixin in-dark (nested with &) — both emit html.dark + no-JS prefers-color-scheme fallback
+  _tokens.scss          oklch + motion CSS variables on :root, with @include dark { ... } for the dark cascade
   _base.scss            resets, scroll-margin targets, body color-flip transition, global reduced-motion + reduced-transparency overrides
   _animations.scss      html.js .reveal:not(.is-shown) gate only (transition lives on <Reveal>)
   _brand.scss           SVG brand-mark theme overrides (need higher specificity than the SVG's inline <style>)
@@ -81,9 +81,20 @@ app/styles/
 
 Whole SCSS surface is ~430 LoC across 8 files. Everything else is utilities on the JSX.
 
-**Design tokens** (`_tokens.scss`) are `oklch()` CSS variables on `:root` (light) with `html.dark` overrides and a no-JS `prefers-color-scheme: dark` fallback. No hex / rgb / hsl anywhere in the SCSS (or in inline SVG fills). `tailwind.css` mirrors these as `--color-*` tokens inside `@theme` so utilities like `bg-paper`, `text-ink-soft`, `border-line` resolve via `var()` and follow the cascade at use-time.
+**Design tokens** (`_tokens.scss`) are `oklch()` CSS variables on `:root` (light) with dark overrides emitted via `@include dark { ... }` (covers both `html.dark` and the no-JS `prefers-color-scheme` fallback). No hex / rgb / hsl anywhere in the SCSS (or in inline SVG fills). `tailwind.css` mirrors these as `--color-*` tokens inside `@theme` so utilities like `bg-paper`, `text-ink-soft`, `border-line` resolve via `var()` and follow the cascade at use-time. The `--color-*` aliases are declared ONLY at `:root`; redeclaring them inside the dark cascade is redundant because `var()` substitution happens at the consuming element's computed-value time.
 
-**The `dark` mixin** (`_mixins.scss`) emits BOTH `html.dark &` AND a no-JS `@media (prefers-color-scheme: dark) html:not(.dark):not(.light) &` selector. **Use `@include dark { ... }` for every dark-mode rule** — writing `html.dark &` directly misses the no-JS path. Partials that need it open with `@use 'mixins' as *;` (or `'../mixins'` from `sections/`).
+**Motion tokens** (`_tokens.scss` + `tailwind.css`) — three named durations own every transition in the project. Tune feel here, not at call sites:
+- `--motion-duration` (200ms) — UI hover/interaction feedback (buttons, nav links, burger, map card hover, etc.). Exposed as Tailwind utility `duration-motion`.
+- `--theme-transition` (400ms) — dark/light colour crossfade (global `body *` cascade in `_base.scss`) + MapBox tile fade. Utility: `duration-theme`.
+- `--reveal-duration` (700ms) — scroll-reveal entrance (`<Reveal>`). Utility: `duration-reveal`.
+
+The `prefers-reduced-motion` global override in `_base.scss` flattens all three to 0.01ms regardless.
+
+**Two dark-cascade mixins** in `_mixins.scss`:
+- `@include dark { ... }` — **top-level** form. Use at root scope to declare a whole block of dark-mode rules (the token cascade, the reduced-transparency `--header-bg` override). Emits `html.dark { ... }` + the no-JS `prefers-color-scheme: dark` fallback.
+- `@include in-dark { ... }` — **nested** form. Use INSIDE an existing rule when only that rule needs a dark variant. Emits `html.dark &` + the no-JS fallback with `&`.
+
+**Don't write `html.dark` or `html.dark &` directly in SCSS** — both miss the no-JS path. Partials open with `@use 'mixins' as *;` (or `'../mixins'` from `sections/`).
 
 #### Custom `@theme` tokens
 
@@ -134,9 +145,11 @@ There is no `public/site.webmanifest` — the file is generated, not committed.
 
 ### Google Maps
 
-`app/lib/google-maps.ts` exports a `@googlemaps/js-api-loader` singleton. The API key is read from `import.meta.env.VITE_GOOGLE_MAPS_API_KEY` — provide it via `.env.local` for local dev (see `.env.example`) and via a repo secret in CI (`deploy-gh-pages.yml` passes it through). The key is origin-restricted by Google, so shipping it in the client bundle is safe; we still keep it out of source for easy rotation.
+`app/lib/google-maps.ts` exports only data — the two `mapTypeStyles` arrays, the praxis coords + Place FTID, and the API key (`import.meta.env.VITE_GOOGLE_MAPS_API_KEY`). Provide the key via `.env.local` for local dev (see `.env.example`) and via a repo secret in CI (`deploy-gh-pages.yml` passes it through). The key is origin-restricted by Google, so shipping it in the client bundle is safe; we still keep it out of source for easy rotation.
 
-`MapBox.tsx` lazy-loads on mount, applies one of two `mapTypeStyles` arrays (light or dark) depending on theme, re-applies via `map.setOptions({styles: ...})` on flip — never re-inits. The CSS placeholder (rendered until JS resolves and on auth failure) keeps the schematic SVG strokes from the design as a soft shimmer, so there's no blank box.
+`MapBox.tsx` uses `@vis.gl/react-google-maps` declaratively: `<APIProvider>` → `<Map styles={…}>` → `<Marker>` + `<MapControl>`. APIProvider is mounted inside MapBox (only consumer — Kontakt section), so the Maps JS doesn't load until that section mounts. Theme flip swaps the `styles` prop directly — no `setOptions` effect. The SVG marker icon needs `google.maps.Size` / `Point` constructors, which only exist after the Maps JS loads; `useMapsLibrary('core')` gates the `<Marker>` render until then.
+
+`gm_authFailure` (the global Google calls when the API key is invalid or the HTTP-Referer restriction rejects the origin, e.g. on localhost) is wired in a `useEffect` to flip a `failed` state and reveal the schematic SVG fallback. `APIProvider`'s `onError` covers initial load failures.
 
 ### i18n is mandatory for all UI strings
 
@@ -192,4 +205,5 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 - **pnpm via Corepack** on host/CI. Production image bypasses Corepack — uses `pkgs.pnpm_10` at build time, ships zero pnpm at runtime.
 - **Nav `Link` hrefs must include the leading `/`** (e.g. `/#kontakt`). Bare `#kontakt` makes react-router resolve relative to the current pathname.
 - **i18n init is guarded by `isInitialized`.** Changing options in `i18n.ts` requires a full dev-server restart (HMR can't re-run init). YAML *content* changes hot-reload via the `import.meta.hot.accept` hook in the same file.
-- **Don't write `html.dark &` directly in SCSS** — use `@include dark { ... }` so the no-JS `prefers-color-scheme` fallback selector is emitted too.
+- **Don't write `html.dark` or `html.dark &` directly in SCSS** — use `@include dark { ... }` (top-level) or `@include in-dark { ... }` (nested) so the no-JS `prefers-color-scheme` fallback selector is emitted too.
+- **Don't redeclare Tailwind `--color-*` aliases under `@include dark`** — they're already declared once at `:root` as `var(--paper)` etc., and `var()` resolves at the consuming element. Redeclaring is pure noise (empirically verified against the live page).
