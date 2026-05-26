@@ -1,37 +1,7 @@
-// `@googlemaps/js-api-loader` is a CommonJS module. Statically importing its
-// named `Loader` export trips Vite's SSR module runner (the named-export
-// detection on CJS only sees `module.exports`, not the bound name). Loading
-// Google Maps is client-only anyway, so resolve the package lazily inside
-// `loadGoogleMaps()` and pull `Loader` off the default export.
-
 // Origin-restricted public key — Google enforces HTTP-Referer whitelisting on
 // it, so shipping in the client bundle is safe. Still sourced from env to
 // keep rotation/staging-vs-prod swaps out of source diffs.
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-
-interface LoaderLike {
-  importLibrary: (name: 'maps') => Promise<google.maps.MapsLibrary>;
-}
-
-let loader: LoaderLike | null = null;
-
-export async function loadGoogleMaps(): Promise<google.maps.MapsLibrary> {
-  if (typeof window === 'undefined') {
-    throw new TypeError('loadGoogleMaps must be called in a browser environment');
-  }
-  if (API_KEY === undefined || API_KEY === '') {
-    // No key wired up — let MapBox catch this and keep the stylised fallback.
-    throw new Error('VITE_GOOGLE_MAPS_API_KEY is not set');
-  }
-  if (!loader) {
-    const mod = await import('@googlemaps/js-api-loader');
-    // Different bundling realities surface `Loader` as either a named export
-    // or a property on the default export; cover both.
-    const LoaderCtor = (mod.Loader ?? (mod as unknown as {default: {Loader: typeof mod.Loader}}).default.Loader);
-    loader = new LoaderCtor({apiKey: API_KEY, version: 'weekly', libraries: ['maps', 'marker']});
-  }
-  return loader.importLibrary('maps');
-}
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
 // Editorial-warm style: cream / tan / forest-green, simplified labels, no
 // POI clutter, soft hierarchy on roads. Hand-tuned to match the page palette

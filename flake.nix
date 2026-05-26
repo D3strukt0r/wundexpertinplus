@@ -4,7 +4,7 @@
   inputs = {
     # Branch ref (not SHA): `nix flake update` resolves to the latest commit,
     # and Dependabot's nix ecosystem watches the resulting flake.lock.
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     # Shared scripts + lib helpers. `follows` keeps a duplicate nixpkgs out
     # of flake.lock.
@@ -45,7 +45,7 @@
             pnpmDeps = pkgs.pnpm_10.fetchDeps {
               inherit (finalAttrs) pname version src;
               fetcherVersion = 2;
-              hash = "sha256-qGg93dRbKv08KLlRET10VdgURH/E8f3yAOtLEk20Wlg=";
+              hash = "sha256-X3mBFIQDRIaKBuOuG4I/KZ24Ji59kVVDBJnjbQmMK/w=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every

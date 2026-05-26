@@ -33,7 +33,7 @@ export function UeberMich() {
 
         <div className="md:pt-9">
           <Reveal>
-            <h2 className="font-serif font-normal text-4xl md:text-6xl m-0 mb-2 leading-none tracking-tight [&_em]:italic [&_em]:text-green">
+            <h2 className="font-serif font-normal text-4xl md:text-6xl m-0 mb-2 leading-none tracking-tight text-ink [&_em]:italic [&_em]:text-green">
               {t('about.name_part1')}
               <br />
               <em>{t('about.name_part2')}</em>

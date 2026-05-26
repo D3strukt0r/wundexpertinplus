@@ -20,7 +20,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.02em;
   max-width: 15rem;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition: background var(--theme-transition) ease, border-color var(--theme-transition) ease;
 
   &:hover {
     background: var(--bg-deep);

@@ -12,7 +12,7 @@ const BASE = classNames(
   'inline-flex items-center gap-2 py-4 px-7',
   'rounded-full no-underline border border-transparent',
   'text-sm tracking-widest font-semibold cursor-pointer',
-  'transition-[background,color,border-color,transform] duration-200 ease',
+  'transition-[background,color,border-color,transform] duration-theme ease',
 );
 
 const VARIANTS = {

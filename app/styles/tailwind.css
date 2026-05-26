@@ -11,28 +11,6 @@
   --font-serif: "Cormorant Garamond", "Times New Roman", serif;
   --font-sans:  "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* Color tokens — reference the runtime CSS variables in _tokens.scss so
-     the light/dark flip cascade still works (var() resolves at use-time,
-     so `text-ink` follows html.dark just like raw var(--ink) does). */
-  --color-bg:           var(--bg);
-  --color-bg-deep:      var(--bg-deep);
-  --color-paper:        var(--paper);
-  --color-ink:          var(--ink);
-  --color-ink-soft:     var(--ink-soft);
-  --color-green:        var(--green);
-  --color-green-soft:   var(--green-soft);
-  --color-tan:          var(--tan);
-  --color-tan-deep:     var(--tan-deep);
-  --color-line:         var(--line);
-  --color-header:       var(--header-bg);
-  --color-map:          var(--map-bg);
-  --color-shadow:       var(--shadow-soft);
-  --color-green-fixed:  var(--green-fixed);
-  --color-paper-fixed:  var(--paper-fixed);
-  --color-tan-fixed:    var(--tan-fixed);
-  --color-on-primary:   var(--on-primary);
-  --color-cta-dot:      var(--cta-dot-bg);
-
   /* Tiny eyebrow caps below text-xs (12px). */
   --text-micro: 0.625rem;  /* 10px */
 
@@ -56,6 +34,51 @@
 
   /* Soft easing curve used across hover/transition effects. */
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Color tokens — declared in a separate `@theme inline` so Tailwind inlines
+   the var() reference directly into utilities (e.g. `.text-green { color:
+   var(--green); }`) instead of going through a `--color-green: var(--green)`
+   alias. The alias indirection breaks our @property-driven theme transition:
+   `--green` is registered as `<color>` in _tokens.scss and animates on theme
+   flip, but Chrome doesn't propagate that animation through an UNREGISTERED
+   alias on top, so consumers see the brand colour snap at end-of-transition
+   instead of interpolating smoothly. Inlining hands them the registered
+   token directly. */
+@theme inline {
+  --color-bg:           var(--bg);
+  --color-bg-deep:      var(--bg-deep);
+  --color-paper:        var(--paper);
+  --color-ink:          var(--ink);
+  --color-ink-soft:     var(--ink-soft);
+  --color-green:        var(--green);
+  --color-green-soft:   var(--green-soft);
+  --color-tan:          var(--tan);
+  --color-tan-deep:     var(--tan-deep);
+  --color-line:         var(--line);
+  --color-header:       var(--header-bg);
+  --color-map:          var(--map-bg);
+  --color-shadow:       var(--shadow-soft);
+  --color-green-fixed:  var(--green-fixed);
+  --color-paper-fixed:  var(--paper-fixed);
+  --color-tan-fixed:    var(--tan-fixed);
+  --color-on-primary:   var(--on-primary);
+  --color-cta-dot:      var(--cta-dot-bg);
+}
+
+/* Duration aliases — declared as explicit `@utility` rules rather than
+   `@theme --duration-*` because Tailwind v4 only mints duration utilities
+   from `--duration-*` tokens that hold a literal `<time>` value (e.g.
+   `150ms`). A `var()` reference (which we need so tuning the runtime
+   variable in `_tokens.scss` re-routes everywhere) is silently skipped —
+   so `duration-theme` was falling through to Tailwind's 150ms default
+   and the theme flip snapped in three frames. Defining as `@utility`
+   bypasses the namespace heuristic and emits the class unconditionally. */
+@utility duration-theme {
+  transition-duration: var(--theme-transition);
+}
+@utility duration-reveal {
+  transition-duration: var(--reveal-duration);
 }
 
 /* Semantic CSS variables consumed via var(...) in SCSS.

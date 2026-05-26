@@ -1,15 +1,26 @@
-// Burger-line transition. Combines the morph timing (transform 0.25s for
-// spans 1/3, opacity 0.15s for span 2) with the global theme-flip timings
-// (background-color/color 0.4s). Lives in CSS because Tailwind's
-// transition-* utilities each set a single transition-property, which
-// would override the global `body *` color-flip rule and make the burger
-// snap instead of fade on theme toggle.
+// Burger-line transition — just the morph (open ↔ close). Background-color
+// and color follow the per-utility transition rule for themed Tailwind
+// classes (see `_base.scss`).
 .site-nav__burger span {
   transition:
-    transform 0.25s ease,
-    opacity 0.15s ease,
-    background-color 0.4s,
-    color 0.4s;
+    transform var(--theme-transition) ease,
+    opacity calc(var(--theme-transition) / 2) ease;
+}
+
+// Header sits in the per-utility transition rule's selector list via its
+// `bg-header` + `border-line` classes, which gives it `transition: color,
+// background-color, border-color`. The `color` part is undesirable here:
+// the header has no themed `text-*` of its own — its `color` only inherits.
+// But an ancestor having a `color` transition stalls descendant `color`
+// transitions (Chrome re-targets each descendant's animation every frame
+// against the ancestor's animating inherited colour, freezing it for the
+// full ancestor-window then playing back over a second window — net ~2x
+// theme-transition lag on the ThemeToggle and similar). Override so the
+// header only transitions its own themed properties (background, border).
+.site-nav {
+  transition:
+    background-color var(--theme-transition) ease,
+    border-color     var(--theme-transition) ease;
 }
 
 // Drawer state morph + hamburger→X transform. Driven by :has() so the
