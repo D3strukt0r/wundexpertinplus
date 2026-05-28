@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import ConcentricRings from '~/assets/decor/concentric-rings.svg?react';
-import portraitSrc from '~/assets/portrait.png';
+import portraitSrc from '~/assets/Sibylle-Buergi.Luetscher.klein_.jpg';
 import {useReveal} from '~/hooks/useReveal';
 import {Button} from './Button';
 import {Container} from './Container';

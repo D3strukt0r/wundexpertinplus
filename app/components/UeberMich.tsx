@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import portraitSrc from '~/assets/portrait.png';
+import portraitSrc from '~/assets/Sibylle-Buergi.Luetscher.klein_.jpg';
 import {Container} from './Container';
 import {Reveal} from './Reveal';
 import {SectionEyebrow} from './SectionEyebrow';
