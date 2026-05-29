@@ -26,6 +26,8 @@ updates:
       interval: weekly # on monday
       time: '09:30'
       timezone: Europe/Zurich
+    cooldown:
+      default-days: 1  # Match pnpm 11 default minimumReleaseAge (1440 min = 1 day)
     groups:
       npm-minor-patch:
         update-types:
