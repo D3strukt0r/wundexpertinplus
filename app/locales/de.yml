@@ -4,6 +4,8 @@ meta:
 
 brand:
   name: 'Wund Expertin Plus'
+  short_name: 'Wund Expertin'
+  description: 'Sibylle Bürgi-Lütscher · Dipl. Wundexpertin SAfW · Wundbehandlung in Baselland'
   subtitle: 'Sibylle Bürgi-Lütscher · SAfW'
   role: 'Dipl. Wundexpertin SAfW'
   person: 'Sibylle Bürgi-Lütscher'

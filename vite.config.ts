@@ -14,6 +14,11 @@ import {faviconRasters} from './app/vite/plugins/favicon-rasters';
 import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {webManifest} from './app/vite/plugins/web-manifest';
 
+const WEB_MANIFEST_ICONS = [
+  {size: 192, out: 'web-app-manifest-192x192.png', purpose: 'maskable'},
+  {size: 512, out: 'web-app-manifest-512x512.png', purpose: 'maskable'},
+] as const;
+
 const isVitest = process.env.VITEST === 'true';
 
 // Single source of truth for the deployed hostname: Settings → Pages →
@@ -45,15 +50,34 @@ export default defineConfig({
     // build-time globals (__COPYRIGHT_YEARS__, __COPYRIGHT_HOLDER__) so
     // the footer copyright stays in lockstep with the legal artefact.
     copyrightFromLicense(),
-    // Rasterises `public/favicon.svg` to PNG + multi-resolution ICO during
-    // the client build. Modern browsers use the SVG directly; these are
-    // fallbacks for older platforms.
-    faviconRasters(),
-    // Emits `site.webmanifest` at build time. Shares the icon set with
-    // `faviconRasters` via `app/config/web-manifest.ts`; sources `name`
-    // from the locale YAML's `brand.name` so a single edit in `de.yml`
-    // propagates to the PWA install title.
-    webManifest(),
+    // Rasterises `app/assets/brand/plaster-plus.svg` to PNG + multi-resolution
+    // ICO during the client build. Modern browsers use the SVG directly;
+    // these are fallbacks for older platforms. The PNG set merges the
+    // favicon-only sizes with the shared PWA manifest icons so the rasters
+    // and the manifest stay in lockstep.
+    faviconRasters({
+      source: join('app', 'assets', 'brand', 'plaster-plus.svg'),
+      svgOut: 'favicon.svg',
+      icoOut: 'favicon.ico',
+      pngs: [
+        {size: 96, out: 'favicon-96x96.png'},
+        {size: 180, out: 'apple-touch-icon.png'},
+        ...WEB_MANIFEST_ICONS.map((i) => ({size: i.size, out: i.out})),
+      ],
+      icoSizes: [16, 32, 48],
+    }),
+    // Emits `site.webmanifest` at build time. Shares its icon set with
+    // `faviconRasters`; sources the text fields from the locale YAML's
+    // `brand.*` so a single edit in `de.yml` propagates to the PWA listing.
+    webManifest({
+      locale: join('app', 'locales', 'de.yml'),
+      out: 'site.webmanifest',
+      keys: {name: 'brand.name', short_name: 'brand.short_name', description: 'brand.description'},
+      // Static knobs; colours are sRGB hex (precomputed from OKLCH — some
+      // Android launchers don't parse `oklch(...)`).
+      manifest: {lang: 'de', display: 'standalone', theme_color: '#f4efe6', background_color: '#f4efe6'},
+      icons: WEB_MANIFEST_ICONS,
+    }),
     // react-router's vite plugin clashes with vitest's environment setup, so
     // skip it when running tests.
     ...(isVitest ? [] : [reactRouter()]),
