@@ -62,12 +62,6 @@
 
             disallowedReferences = [ pkgs.nodejs_24 ];
 
-            # Forwarded into the build env so vite.config.ts can read
-            # process.env.SITE_HOST (the workflow fetches the value from
-            # GitHub Pages settings via the REST API and exports it).
-            # Empty when unset; vite.config.ts falls back to 'localhost'.
-            SITE_HOST = builtins.getEnv "SITE_HOST";
-
             buildPhase = ''
               runHook preBuild
 
