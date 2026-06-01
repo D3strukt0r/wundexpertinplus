@@ -115,6 +115,8 @@ menu:
   open: 'Menü öffnen'
   close: 'Menü schliessen'
 
+scroll_to_top: 'Nach oben scrollen'
+
 footer:
   copyright_content: 'Inhalt © {{years}} Sibylle Bürgi-Lütscher'
   copyright_code: 'Design & Code © {{years}} {{holder}}'

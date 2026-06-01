@@ -1,5 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import portraitSrc from '~/assets/Sibylle-Buergi.Luetscher.klein_.jpg';
+import {Card} from '~/components/ui/card';
 import {Container} from './Container';
 import {Reveal} from './Reveal';
 import {SectionEyebrow} from './SectionEyebrow';
@@ -15,67 +16,63 @@ export function UeberMich() {
   const creds = t('about.creds', {returnObjects: true}) as Cred[];
 
   return (
-    <section id="ueber-mich" className="bg-bg py-14 md:py-30 relative">
-      <Container className="grid grid-cols-1 gap-8 items-start md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.2fr)] md:gap-6 lg:gap-22">
-        <Reveal>
-          <SectionEyebrow>{t('about.section_number')}</SectionEyebrow>
-          <figure className="relative overflow-hidden rounded border border-line bg-paper max-w-105 m-0">
-            <img
-              src={portraitSrc}
-              alt={t('hero.portrait_alt')}
-              className="w-full h-auto aspect-[7/8] object-cover [object-position:center_25%] [filter:var(--ueber-portrait-filter)]"
-            />
-          </figure>
-          <p className="mt-stack text-xs text-ink-soft tracking-wider italic">
-            {t('about.portrait_caption')}
-          </p>
-        </Reveal>
-
-        <div className="md:pt-9">
+    <section id="ueber-mich" className="relative overflow-hidden">
+      <Container className="py-16 lg:py-24">
+        <div className="grid items-start gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+          {/* Portrait */}
           <Reveal>
-            <h2 className="font-serif font-normal text-4xl md:text-6xl m-0 mb-2 leading-none tracking-tight text-ink [&_em]:italic [&_em]:text-green">
-              {t('about.name_part1')}
-              <br />
-              <em>{t('about.name_part2')}</em>
-            </h2>
-            <p className="text-sm text-ink-soft tracking-eyebrow uppercase mt-2 m-0">
-              {t('about.role_subtitle')}
+            <SectionEyebrow>{t('about.section_number')}</SectionEyebrow>
+            <Card className="mt-5 max-w-[300px] gap-0 overflow-hidden rounded-lg p-0 shadow-none">
+              <img
+                src={portraitSrc}
+                alt={t('hero.portrait_alt')}
+                className="aspect-[5/6] w-full object-cover object-[center_25%]"
+              />
+            </Card>
+            <p className="mt-4 text-xs italic tracking-wide text-muted-foreground">
+              {t('about.portrait_caption')}
             </p>
           </Reveal>
 
-          <Reveal delay={150}>
-            <p className="text-base md:text-lg leading-relaxed text-ink-soft m-0 mt-stack-lg md:mt-9 max-w-140">
-              {t('about.body')}
-            </p>
-          </Reveal>
+          {/* Bio + credentials */}
+          <div className="lg:pt-9">
+            <Reveal>
+              <h2 className="font-serif text-5xl leading-none tracking-tight text-foreground sm:text-6xl [&_em]:italic [&_em]:text-primary">
+                {t('about.name_part1')}
+                <br />
+                <em>{t('about.name_part2')}</em>
+              </h2>
+              <div className="mt-4 text-sm uppercase tracking-[0.18em] text-muted-foreground">
+                {t('about.role_subtitle')}
+              </div>
+            </Reveal>
 
-          {/* lg+: `grid-cols-[max-content_1fr]` on the UL with subgrid on
-              each LI gives a year | title row, year column auto-shrunk to
-              the widest label. Below lg the column doesn't have room to
-              breathe, so cred rows fall back to the mobile stacked layout
-              (year label above title) for legibility. */}
-          <ul className="list-none p-0 mt-7 md:mt-14 border-t border-line lg:grid lg:grid-cols-[max-content_1fr] lg:gap-x-16">
-            {creds.map((cred, i) => (
-              <Reveal
-                as="li"
-                key={cred.title}
-                delay={i * 100}
-                className="grid grid-cols-1 gap-y-1.5 py-stack border-b border-line lg:col-span-2 lg:grid-cols-subgrid lg:items-baseline lg:py-6"
-              >
-                <div className="text-xs text-tan-deep tracking-eyebrow uppercase">
-                  {cred.year ?? t('about.qualification_fallback')}
-                </div>
-                <div>
-                  <h3 className="font-serif font-normal text-xl md:text-2xl text-ink leading-tight m-0">
-                    {cred.title}
-                  </h3>
-                  {cred.note !== undefined && cred.note !== ''
-                    ? <p className="text-sm text-ink-soft mt-1 m-0">{cred.note}</p>
-                    : null}
-                </div>
-              </Reveal>
-            ))}
-          </ul>
+            <Reveal delay={120}>
+              <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                {t('about.body')}
+              </p>
+            </Reveal>
+
+            <ul className="mt-12 list-none border-t border-border p-0">
+              {creds.map((cred, i) => (
+                <Reveal as="li" key={cred.title} delay={i * 90}>
+                  <div className="grid grid-cols-1 gap-1 border-b border-border py-6 sm:grid-cols-[140px_1fr] sm:gap-8">
+                    <div className="text-xs uppercase tracking-[0.18em] text-accent">
+                      {cred.year ?? t('about.qualification_fallback')}
+                    </div>
+                    <div>
+                      <div className="font-serif text-2xl leading-tight text-foreground">
+                        {cred.title}
+                      </div>
+                      {cred.note !== undefined && cred.note !== ''
+                        ? <div className="mt-1 text-sm text-muted-foreground">{cred.note}</div>
+                        : null}
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
         </div>
       </Container>
     </section>

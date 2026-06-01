@@ -1,20 +1,18 @@
-import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
+import {cn} from '~/lib/utils';
 
-// Sits inside the Kontakt section's dark-green panel — closing line of the
-// page rather than a separate slab. Two copyrights side by side: editorial
-// content (Sibylle) and design/code (Manuele via the copyright-from-license
-// vite plugin, so years/holder track the LICENSE.txt).
+// Sits inside the Kontakt section's dark-green panel — the closing line of the
+// page rather than a separate slab. Cream-on-green via the theme-fixed tokens
+// so it reads identically in light and dark. Two copyrights: editorial content
+// (Sibylle) and design/code (Manuele via the copyright-from-license vite
+// plugin, so years/holder track LICENSE.txt).
 export function Footer() {
   const {t} = useTranslation();
   return (
     <footer
-      className={classNames(
-        'pt-8 border-t border-paper-fixed/[0.18]',
-        'flex flex-col items-center text-center gap-1.5',
-        'md:flex-row md:justify-between md:items-start md:text-left md:gap-4',
-        'text-paper-fixed/[0.55] text-xs md:text-xs',
-        'tracking-eyebrow-tight uppercase',
+      className={cn(
+        'flex flex-col gap-3 border-t border-paper-fixed/15 pt-8 text-[11px] uppercase tracking-[0.14em] text-paper-fixed/55',
+        'sm:flex-row sm:items-center sm:justify-between',
       )}
     >
       <div className="flex flex-col gap-1">

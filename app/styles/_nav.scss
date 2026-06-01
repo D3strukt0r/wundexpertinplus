@@ -1,22 +1,24 @@
-// Burger-line transition — just the morph (open ↔ close). Background-color
-// and color follow the per-utility transition rule for themed Tailwind
-// classes (see `_base.scss`).
-.site-nav__burger span {
+// Burger-line transition — just the morph (open ↔ close). The three bars are
+// the inner `<span>`s of the grid wrapper inside the burger `<label>`.
+// Background-color and color follow the per-utility transition rule for themed
+// Tailwind classes (see `_base.scss`).
+.site-nav__burger span span {
   transition:
     transform var(--theme-transition) ease,
     opacity calc(var(--theme-transition) / 2) ease;
 }
 
 // Header sits in the per-utility transition rule's selector list via its
-// `bg-header` + `border-line` classes, which gives it `transition: color,
-// background-color, border-color`. The `color` part is undesirable here:
-// the header has no themed `text-*` of its own — its `color` only inherits.
-// But an ancestor having a `color` transition stalls descendant `color`
-// transitions (Chrome re-targets each descendant's animation every frame
-// against the ancestor's animating inherited colour, freezing it for the
-// full ancestor-window then playing back over a second window — net ~2x
-// theme-transition lag on the ThemeToggle and similar). Override so the
-// header only transitions its own themed properties (background, border).
+// `bg-background/85` (`bg-background`) + `border-border` classes, which gives
+// it `transition: color, background-color, border-color`. The `color` part is
+// undesirable here: the header has no themed `text-*` of its own — its
+// `color` only inherits. But an ancestor having a `color` transition stalls
+// descendant `color` transitions (Chrome re-targets each descendant's
+// animation every frame against the ancestor's animating inherited colour,
+// freezing it for the full ancestor-window then playing back over a second
+// window — net ~2x theme-transition lag on the ThemeToggle and similar).
+// Override so the header only transitions its own themed properties
+// (background, border).
 .site-nav {
   transition:
     background-color var(--theme-transition) ease,
@@ -27,13 +29,13 @@
 // no-JS drawer still opens and closes when JavaScript is disabled. Base
 // styles for the spans and drawer live as Tailwind utilities in Nav.tsx.
 .site-nav:has(.site-nav__toggle:checked) {
-  .site-nav__burger span:nth-child(1) { transform: translateY(0.34375rem) rotate(45deg); }
-  .site-nav__burger span:nth-child(2) { opacity: 0; }
-  .site-nav__burger span:nth-child(3) { transform: translateY(-0.34375rem) rotate(-45deg); }
+  .site-nav__burger span span:nth-child(1) { transform: translateY(0.375rem) rotate(45deg); }
+  .site-nav__burger span span:nth-child(2) { opacity: 0; }
+  .site-nav__burger span span:nth-child(3) { transform: translateY(-0.375rem) rotate(-45deg); }
 
   .site-nav__drawer {
     max-height: 26.25rem;
-    border-top: 0.0625rem solid var(--line);
-    border-bottom: 0.0625rem solid var(--line);
+    border-top: 0.0625rem solid var(--border);
+    border-bottom: 0.0625rem solid var(--border);
   }
 }

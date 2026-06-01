@@ -4,9 +4,9 @@ const STORAGE_KEY = 'wundexpertinplus:theme';
 
 // Shared by the JSX `<meta name="theme-color">` tags in root.tsx, the inline
 // bootstrap that runs them on first paint, and `applyTheme` below. Same values
-// as the `--bg` token in `_tokens.scss` (light line 21, dark line 63).
-export const THEME_COLOR_LIGHT = 'oklch(95.4% 3.25% 82.4deg)';
-export const THEME_COLOR_DARK = 'oklch(23.0% 5% 167.0deg)';
+// as the `--background` token in `_tokens.scss` (light :root, dark cascade).
+export const THEME_COLOR_LIGHT = 'oklch(95.4% 0.0130 81.5deg)';
+export const THEME_COLOR_DARK = 'oklch(21.6% 0.0181 168deg)';
 
 export type Theme = 'light' | 'dark';
 

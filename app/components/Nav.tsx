@@ -1,4 +1,3 @@
-import classNames from 'classnames';
 import {useEffect, useId, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
@@ -6,6 +5,7 @@ import PlasterPlus from '~/assets/brand/plaster-plus.svg?react';
 import ArrowIcon from '~/assets/icons/arrow-up-right.svg?react';
 import LinkedInIcon from '~/assets/icons/linkedin.svg?react';
 import PhoneIcon from '~/assets/icons/phone.svg?react';
+import {Button} from '~/components/ui/button';
 import {Container} from './Container';
 import {ThemeToggle} from './ThemeToggle';
 
@@ -13,14 +13,6 @@ interface NavLink {
   href: string;
   label: string;
 }
-
-const ICON_BUTTON = classNames(
-  'inline-flex items-center justify-center shrink-0 no-underline',
-  'w-9 h-9 rounded-full border border-line bg-transparent text-ink',
-  'transition-[background,border-color,color] duration-theme ease',
-  'hover:bg-bg-deep hover:border-ink-soft',
-  'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
-);
 
 export function Nav() {
   const {t} = useTranslation();
@@ -32,9 +24,9 @@ export function Nav() {
 
   // The mobile drawer is driven by a hidden checkbox + label, not React
   // state — that makes the menu usable when JS is disabled (CSS opens via
-  // `:has(input:checked)`). React still tracks `open` so we can sync the
-  // checkbox programmatically (e.g. clicking a hash link), and so the
-  // aria-expanded / aria-label values stay accurate.
+  // `:has(input:checked)` in _nav.scss). React still tracks `open` so we can
+  // sync the checkbox programmatically (e.g. clicking a hash link) and keep
+  // aria-expanded / aria-label accurate.
   const drawerId = useId();
   const [open, setOpen] = useState(false);
 
@@ -53,7 +45,7 @@ export function Nav() {
   }, [open]);
 
   return (
-    <header className="site-nav sticky top-0 z-40 bg-header backdrop-blur-md border-b border-line">
+    <header className="site-nav sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
       <input
         id={drawerId}
         className="site-nav__toggle absolute w-px h-px opacity-0 pointer-events-none"
@@ -65,60 +57,64 @@ export function Nav() {
           setOpen(e.target.checked);
         }}
       />
-      <Container className="flex items-center justify-between gap-4 py-3.5 lg:py-5">
+      <Container className="flex h-16 items-center justify-between gap-4 lg:h-20">
         <Link
           to="/#home"
           onClick={() => {
             setOpen(false);
           }}
-          className="flex items-center gap-3 no-underline text-ink min-w-0"
+          className="flex items-center gap-3 min-w-0"
         >
           <PlasterPlus
             aria-hidden="true"
-            className="w-stack-lg h-stack-lg shrink-0 lg:w-7 lg:h-7"
+            className="h-8 w-8 shrink-0 lg:h-9 lg:w-9"
           />
           <span className="flex flex-col leading-none min-w-0">
-            <span className="font-serif text-lg lg:text-xl text-green tracking-wide whitespace-nowrap">
+            <span className="font-serif text-lg tracking-tight text-primary lg:text-xl whitespace-nowrap">
               {brand}
             </span>
-            <span className="hidden lg:block text-micro tracking-eyebrow-wide text-ink-soft uppercase mt-1 whitespace-nowrap">
+            <span className="mt-1 hidden text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:block whitespace-nowrap">
               {subtitle}
             </span>
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-4 xl:gap-7">
+        <nav className="hidden lg:flex items-center gap-8">
           {links.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className="text-ink-soft no-underline text-sm tracking-eyebrow-tight uppercase font-medium whitespace-nowrap transition-colors duration-theme ease hover:text-ink"
+              className="text-[13px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
-          <a
-            href={t('contact.linkedin_url')}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={t('contact.linkedin_label')}
-            title={t('contact.linkedin_label')}
-            className={classNames(ICON_BUTTON, 'max-xl:hidden')}
-          >
-            <LinkedInIcon width={18} height={18} aria-hidden="true" />
-          </a>
-          <a
-            href={telHref}
-            className="bg-green text-on-primary py-2.5 px-stack rounded-full no-underline text-sm tracking-widest whitespace-nowrap inline-flex items-center gap-2 hover:bg-green-soft"
-          >
-            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-cta-dot" />
-            {tel}
-          </a>
-          <ThemeToggle />
         </nav>
 
-        <div className="lg:hidden flex items-center gap-2">
-          <ThemeToggle size="sm" />
+        <div className="flex items-center gap-2.5">
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="hidden lg:inline-flex"
+          >
+            <a
+              href={t('contact.linkedin_url')}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('contact.linkedin_label')}
+              title={t('contact.linkedin_label')}
+            >
+              <LinkedInIcon width={18} height={18} aria-hidden="true" />
+            </a>
+          </Button>
+          <Button asChild className="hidden md:inline-flex">
+            <a href={telHref}>
+              <PhoneIcon width={16} height={16} aria-hidden="true" />
+              {tel}
+            </a>
+          </Button>
+          <ThemeToggle />
           <label
             htmlFor={drawerId}
             aria-label={open ? t('menu.close') : t('menu.open')}
@@ -127,24 +123,26 @@ export function Nav() {
             tabIndex={0}
             onKeyDown={(e) => {
               // role="button" semantics: activate on Enter/Space. Native
-              // labels only respond to clicks, so we forward keyboard
-              // activation manually. The input's `onChange` syncs state.
+              // labels only respond to clicks, so forward keyboard activation
+              // manually. The input's `onChange` syncs state.
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 setOpen((o) => !o);
               }
             }}
-            className="site-nav__burger bg-transparent border-0 p-1.5 cursor-pointer grid gap-1 justify-items-end focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2 focus-visible:rounded"
+            className="site-nav__burger inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-border text-foreground transition-colors duration-theme ease hover:bg-secondary lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span aria-hidden="true" className="block w-stack-lg h-hairline bg-ink origin-center" />
-            <span aria-hidden="true" className="block w-stack-lg h-hairline bg-ink origin-center" />
-            <span aria-hidden="true" className="block w-stack-lg h-hairline bg-ink origin-center" />
+            <span className="grid gap-[5px] justify-items-center">
+              <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />
+              <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />
+              <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />
+            </span>
           </label>
         </div>
       </Container>
 
-      <div className="site-nav__drawer absolute top-full inset-x-0 max-h-0 overflow-hidden bg-paper transition-drawer lg:hidden">
-        <Container as="nav" className="flex flex-col py-2 pb-stack">
+      <div className="site-nav__drawer absolute top-full inset-x-0 max-h-0 overflow-hidden bg-card transition-drawer lg:hidden">
+        <Container as="nav" className="flex flex-col py-3">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -152,27 +150,28 @@ export function Nav() {
               onClick={() => {
                 setOpen(false);
               }}
-              className="flex justify-between items-baseline py-3.5 no-underline text-ink border-b border-line font-serif text-2xl"
+              className="flex justify-between items-center border-b border-border py-3.5 font-serif text-2xl text-foreground transition-colors duration-theme ease hover:text-primary"
             >
               <span>{link.label}</span>
               <ArrowIcon
-                width={14}
-                height={14}
+                width={16}
+                height={16}
                 aria-hidden="true"
-                className="text-tan-deep shrink-0"
+                className="text-accent shrink-0"
               />
             </Link>
           ))}
-          <a
-            href={telHref}
-            onClick={() => {
-              setOpen(false);
-            }}
-            className="mt-stack bg-green text-on-primary py-3.5 px-stack rounded-full no-underline text-sm tracking-wider font-semibold text-center inline-flex items-center justify-center gap-2.5"
-          >
-            <PhoneIcon width={16} height={16} aria-hidden="true" />
-            {tel}
-          </a>
+          <Button asChild size="lg" className="mt-4">
+            <a
+              href={telHref}
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              <PhoneIcon width={16} height={16} aria-hidden="true" />
+              {tel}
+            </a>
+          </Button>
           <a
             href={t('contact.linkedin_url')}
             target="_blank"
@@ -180,7 +179,7 @@ export function Nav() {
             onClick={() => {
               setOpen(false);
             }}
-            className="mt-3.5 inline-flex items-center justify-center gap-2.5 text-ink-soft text-sm tracking-wider no-underline py-1.5 px-3 transition-colors duration-theme ease hover:text-ink"
+            className="mt-3.5 inline-flex items-center justify-center gap-2.5 py-1.5 px-3 text-sm tracking-wider text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
           >
             <LinkedInIcon width={16} height={16} aria-hidden="true" />
             <span>{t('contact.linkedin_label')}</span>

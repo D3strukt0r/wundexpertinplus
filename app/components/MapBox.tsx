@@ -1,11 +1,11 @@
 import {APIProvider, ControlPosition, Map, MapControl, Marker, useMapsLibrary} from '@vis.gl/react-google-maps';
-import classNames from 'classnames';
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import markerUrl from '~/assets/brand/map-marker.svg?url';
 import SchematicMap from '~/assets/decor/schematic-map.svg?react';
 import {useTheme} from '~/hooks/useTheme';
 import {GOOGLE_MAPS_API_KEY, MAP_STYLES_DARK, MAP_STYLES_LIGHT, PRAXIS_COORDS, PRAXIS_PLACE_FTID} from '~/lib/google-maps';
+import {cn} from '~/lib/utils';
 
 // Google Maps invokes this global when the API key is invalid or the
 // HTTP-Referer restriction rejects the current origin (e.g. on localhost,
@@ -45,12 +45,12 @@ export function MapBox() {
   const hasKey = GOOGLE_MAPS_API_KEY !== undefined && GOOGLE_MAPS_API_KEY !== '';
 
   return (
-    <div className="relative h-50 md:h-60 border-b border-line overflow-hidden bg-map">
+    <div className="relative h-56 w-full overflow-hidden border-b border-border bg-map-bg-fixed">
       {showFallback
         ? (
-            <div className="absolute inset-0 bg-bg text-ink pointer-events-none" aria-hidden="true">
+            <div className="absolute inset-0 pointer-events-none text-paper-fixed" aria-hidden="true">
               <SchematicMap className="block w-full h-full" preserveAspectRatio="none" />
-              <span className="absolute left-5 bottom-3.5 text-xs text-ink-soft tracking-eyebrow uppercase">
+              <span className="absolute left-5 bottom-3.5 text-[10px] uppercase tracking-[0.18em] text-paper-fixed/55">
                 {t('kontakt.praxis.map_label')}
               </span>
             </div>
@@ -59,7 +59,7 @@ export function MapBox() {
       {hasKey
         ? (
             <div
-              className={classNames('absolute inset-0 transition-opacity duration-theme ease', {
+              className={cn('absolute inset-0 transition-opacity duration-theme ease', {
                 'opacity-100': ready && !failed,
                 'opacity-0': !ready || failed,
                 'invisible pointer-events-none': failed,
