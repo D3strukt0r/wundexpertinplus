@@ -87,7 +87,7 @@ export function Kontakt() {
         <div className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-2 lg:gap-16">
           {/* Contact methods + perks */}
           <Reveal delay={100}>
-            <p className="max-w-md text-[15px] leading-relaxed text-paper-fixed/75">
+            <p className="max-w-md text-lg leading-relaxed text-paper-fixed/75">
               {t('kontakt.intro')}
             </p>
 

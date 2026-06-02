@@ -66,7 +66,7 @@ export function Leistungen() {
               aria-hidden="true"
               className="h-11 w-11 flex-shrink-0 text-primary"
             />
-            <p className="text-[15px] leading-relaxed text-muted-foreground [&_strong]:font-semibold [&_strong]:text-foreground">
+            <p className="text-base leading-relaxed text-muted-foreground [&_strong]:font-semibold [&_strong]:text-foreground">
               <strong>{t('leistungen.insurance_label')}</strong> {t('leistungen.insurance_note')}
             </p>
           </Card>
