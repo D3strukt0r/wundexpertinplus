@@ -84,7 +84,7 @@ export function Nav() {
             <Link
               key={link.href}
               to={link.href}
-              className="text-[13px] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
+              className="text-[13px] font-medium uppercase tracking-[0.14em] whitespace-nowrap text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
             >
               {link.label}
             </Link>

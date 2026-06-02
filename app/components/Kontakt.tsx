@@ -41,10 +41,11 @@ function Tile({href, external, icon, label, value, emailLike}: TileProps) {
         <span className="block text-[11px] tracking-[0.22em] text-accent-fixed">{label}</span>
         <span
           className={cn(
-            'mt-0.5 block font-serif text-xl sm:text-2xl',
-            // Email addresses contain no spaces; allow mid-word breaking so the
-            // line wraps inside the tile instead of overflowing.
-            {'break-all text-lg sm:text-xl': emailLike === true},
+            'mt-0.5 block font-serif text-lg sm:text-xl',
+            // All three tiles share one size. Email addresses contain no spaces,
+            // so allow mid-word breaking to wrap inside the tile instead of
+            // overflowing.
+            emailLike === true ? 'break-all' : undefined,
           )}
         >
           {value}

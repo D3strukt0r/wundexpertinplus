@@ -56,7 +56,7 @@ export function UeberMich() {
             <ul className="mt-12 list-none border-t border-border p-0">
               {creds.map((cred, i) => (
                 <Reveal as="li" key={cred.title} delay={i * 90}>
-                  <div className="grid grid-cols-1 gap-1 border-b border-border py-6 sm:grid-cols-[140px_1fr] sm:gap-8">
+                  <div className="grid grid-cols-1 gap-1 border-b border-border py-6 sm:grid-cols-[200px_1fr] sm:items-baseline sm:gap-8">
                     <div className="text-xs uppercase tracking-[0.18em] text-accent">
                       {cred.year ?? t('about.qualification_fallback')}
                     </div>

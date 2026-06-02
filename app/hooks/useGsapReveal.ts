@@ -50,8 +50,13 @@ export function useGsapReveal<E extends HTMLElement = HTMLElement>(
         return;
       }
 
-      // Only animate when the visitor hasn't asked for reduced motion. Under
-      // reduce nothing is added — the element keeps its visible CSS state.
+      // Gate motion with `gsap.matchMedia` so toggling `prefers-reduced-motion`
+      // mid-session enables/disables the reveal LIVE (turning motion off reverts
+      // the no-preference branch → element stays visible; turning it back on
+      // re-adds it). Accepted tradeoff: the matchMedia revert/re-add refreshes
+      // ScrollTrigger, which scrolls the page to the top at the toggle moment —
+      // a known GSAP behaviour we tolerate for live reduced-motion handling.
+      // (Do NOT "fix" this by reading the preference once — that needs a reload.)
       const mm = gsap.matchMedia();
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const tween = gsap.fromTo(
@@ -73,9 +78,9 @@ export function useGsapReveal<E extends HTMLElement = HTMLElement>(
         );
 
         // `toggleActions` only fire on a state transition. An element already
-        // past its start point at load (above the fold) never "enters", so
-        // snap any already-active trigger to its end state on each refresh so
-        // it shows immediately.
+        // past its start point at load (above the fold) never "enters", so snap
+        // any already-active trigger to its end state on each refresh so it
+        // shows immediately.
         const st = tween.scrollTrigger;
         const seed = () => {
           if (st !== undefined && st.isActive) {
@@ -91,7 +96,7 @@ export function useGsapReveal<E extends HTMLElement = HTMLElement>(
       });
 
       // Re-measure trigger positions once web fonts have swapped in and after a
-      // post-mount frame, so start/end offsets match the final layout.
+      // post-mount frame.
       const refresh = () => {
         ScrollTrigger.refresh();
       };

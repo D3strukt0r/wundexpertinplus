@@ -4,6 +4,11 @@ allowBuilds:
   esbuild: true
   sharp: true
 
+minimumReleaseAgeExclude:
+  - '@types/react@19.2.16'
+  - react-dom@19.2.7
+  - react@19.2.7
+
 # Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
 # pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
 # ships a release on the patched version.

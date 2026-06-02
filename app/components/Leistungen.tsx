@@ -43,8 +43,12 @@ export function Leistungen() {
               delay={i * 70}
               className={cn(
                 'border-b border-border px-1 py-8 sm:px-6 lg:px-5',
-                'sm:[&:nth-child(odd)]:border-r lg:border-r',
-                i === items.length - 1 && 'lg:border-r-0',
+                // 2-col (sm–lg) divider on left-column items; 5-col (lg) dividers
+                // between every column except the last. The nth-child rule is gated
+                // to `max-lg` so it can't out-specify `lg:[&:last-child]:border-r-0`
+                // at lg (both are 0,2,0 — a fragile tie if both applied).
+                'sm:max-lg:[&:nth-child(odd)]:border-r lg:border-r',
+                'lg:[&:last-child]:border-r-0',
               )}
             >
               <div className="text-[11px] tracking-[0.2em] text-accent">{`0${i + 1}`}</div>
