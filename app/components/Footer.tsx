@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer
       className={cn(
-        'flex flex-col gap-3 border-t border-paper-fixed/15 pt-8 text-[11px] uppercase tracking-[0.14em] text-paper-fixed/55',
+        'flex flex-col gap-3 border-t border-paper-fixed/15 pt-8 text-xs uppercase tracking-label text-paper-fixed/55',
         'sm:flex-row sm:items-center sm:justify-between',
       )}
     >

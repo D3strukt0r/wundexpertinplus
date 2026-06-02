@@ -31,10 +31,26 @@
   /* Radius ladder. shadcn primitives reference `rounded-lg/md/sm/xl`; derive
      them from the single `--radius` token in _tokens.scss so retuning one
      value re-steps the whole ladder. */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+
+  /* Font-size scale extensions. */
+  --text-2xs: 0.625rem;                 /* 10px — micro labels below xs */
+  --text-display: 2.75rem;              /* 44px — oversized hero/display text */
+  --text-display--line-height: 1.04;    /* tight line-height paired with text-display */
+
+  /* Letter-spacing tokens for uppercase/eyebrow/quote treatments. */
+  --tracking-label: 0.14em;             /* small UI labels */
+  --tracking-caps: 0.18em;              /* uppercase caps */
+  --tracking-widecaps: 0.2em;           /* wider uppercase caps */
+  --tracking-eyebrow: 0.22em;           /* eyebrow kickers above headings */
+  --tracking-quote: 0.24em;             /* pull-quote spacing */
+  --tracking-hero: 0.3em;               /* hero spaced lettering */
+
+  /* Line-height token for display-size headings. */
+  --leading-display: 1.05;              /* compact leading for large display text */
 }
 
 /* Color tokens — declared in a separate `@theme inline` so Tailwind inlines

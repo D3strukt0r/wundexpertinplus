@@ -50,7 +50,7 @@ export function MapBox() {
         ? (
             <div className="absolute inset-0 pointer-events-none text-paper-fixed" aria-hidden="true">
               <SchematicMap className="block w-full h-full" preserveAspectRatio="none" />
-              <span className="absolute left-5 bottom-3.5 text-[10px] uppercase tracking-[0.18em] text-paper-fixed/55">
+              <span className="absolute left-5 bottom-3.5 text-2xs uppercase tracking-caps text-paper-fixed/55">
                 {t('kontakt.praxis.map_label')}
               </span>
             </div>

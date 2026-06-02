@@ -13,7 +13,7 @@ export function Hero() {
       {/* Decorative concentric arcs, top-right. */}
       <ConcentricRings
         aria-hidden="true"
-        className="pointer-events-none absolute -right-25 -top-15 h-60 w-60 text-accent/45 md:-right-40 md:-top-28 md:h-[34rem] md:w-[34rem]"
+        className="pointer-events-none absolute -right-25 -top-15 h-60 w-60 text-accent/45 md:-right-40 md:-top-28 md:h-136 md:w-136"
       />
 
       <Container className="relative py-16 lg:py-24">
@@ -27,7 +27,7 @@ export function Hero() {
             </Reveal>
 
             <Reveal delay={80}>
-              <h1 className="mt-7 font-serif text-[2.75rem] leading-[1.04] tracking-tight text-foreground sm:text-6xl lg:text-7xl [&_em]:italic [&_em]:text-primary">
+              <h1 className="mt-7 font-serif text-display tracking-tight text-foreground sm:text-6xl lg:text-7xl [&_em]:italic [&_em]:text-primary">
                 {t('hero.title_part1')}{' '}
                 {t('hero.title_part2')} <em>{t('hero.title_emphasis')}</em>{' '}
                 {t('hero.title_part3')}
@@ -54,12 +54,12 @@ export function Hero() {
 
           {/* Portrait — arch frame + tan blob behind it. */}
           <Reveal delay={150}>
-            <div className="relative mx-auto w-full max-w-[300px] lg:mx-0 lg:ml-auto">
+            <div className="relative mx-auto w-full max-w-75 lg:mx-0 lg:ml-auto">
               <span
                 aria-hidden="true"
                 className="absolute -inset-4 -z-10 -rotate-4 rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-accent/50"
               />
-              <figure className="relative m-0 overflow-hidden rounded-[280px/18px] border border-border bg-card shadow-card">
+              <figure className="relative m-0 overflow-hidden rounded-[17.5rem/1.125rem] border border-border bg-card shadow-card">
                 <img
                   src={portraitSrc}
                   alt={t('hero.portrait_alt')}
@@ -74,7 +74,7 @@ export function Hero() {
                       {t('brand.role')}
                     </span>
                   </span>
-                  <span aria-hidden="true" className="text-[11px] tracking-[0.22em] text-accent">
+                  <span aria-hidden="true" className="text-xs tracking-eyebrow text-accent">
                     Nº 01
                   </span>
                 </figcaption>
@@ -92,7 +92,7 @@ export function Hero() {
             <p className="font-serif text-2xl italic leading-snug text-foreground sm:text-3xl">
               {t('hero.pull')}
             </p>
-            <span className="hidden text-[11px] uppercase tracking-[0.24em] text-muted-foreground lg:block lg:[writing-mode:vertical-rl] lg:rotate-180">
+            <span className="hidden text-xs uppercase tracking-quote text-muted-foreground lg:block lg:[writing-mode:vertical-rl] lg:rotate-180">
               {t('hero.caption_label')}
             </span>
           </div>

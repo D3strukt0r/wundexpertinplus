@@ -38,7 +38,7 @@ function Tile({href, external, icon, label, value, emailLike}: TileProps) {
         {icon}
       </span>
       <span className={emailLike === true ? 'min-w-0' : undefined}>
-        <span className="block text-[11px] tracking-[0.22em] text-accent-fixed">{label}</span>
+        <span className="block text-xs tracking-eyebrow text-accent-fixed">{label}</span>
         <span
           className={cn(
             'mt-0.5 block font-serif text-lg sm:text-xl',
@@ -70,15 +70,15 @@ export function Kontakt() {
     >
       <ConcentricRings
         aria-hidden="true"
-        className="pointer-events-none absolute -left-56 -bottom-60 h-[44rem] w-[44rem] text-accent-fixed/15"
+        className="pointer-events-none absolute -left-56 -bottom-60 h-176 w-176 text-accent-fixed/15"
       />
 
       <Container className="relative py-16 lg:py-24">
         <Reveal>
-          <div className="text-[11px] uppercase tracking-[0.3em] text-accent-fixed">
+          <div className="text-xs uppercase tracking-hero text-accent-fixed">
             {t('kontakt.section_number')}
           </div>
-          <h2 className="mt-5 max-w-3xl font-serif text-5xl leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl [&_em]:italic [&_em]:text-accent-fixed">
+          <h2 className="mt-5 max-w-3xl font-serif text-5xl leading-display tracking-tight sm:text-6xl lg:text-7xl [&_em]:italic [&_em]:text-accent-fixed">
             {t('kontakt.title_part1')}{' '}
             <em>{t('kontakt.title_emphasis')}</em> {t('kontakt.title_part2')}
           </h2>
@@ -131,7 +131,7 @@ export function Kontakt() {
             <article className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
               <MapBox />
               <div className="p-8">
-                <div className="text-[11px] uppercase tracking-[0.22em] text-primary">
+                <div className="text-xs uppercase tracking-eyebrow text-primary">
                   {t('kontakt.praxis.eyebrow')}
                 </div>
                 <h3 className="mt-2.5 font-serif text-2xl leading-snug text-foreground">

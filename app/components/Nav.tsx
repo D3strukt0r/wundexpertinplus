@@ -73,7 +73,7 @@ export function Nav() {
             <span className="font-serif text-lg tracking-tight text-primary lg:text-xl whitespace-nowrap">
               {brand}
             </span>
-            <span className="mt-1 hidden text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:block whitespace-nowrap">
+            <span className="mt-1 hidden text-2xs uppercase tracking-eyebrow text-muted-foreground sm:block whitespace-nowrap">
               {subtitle}
             </span>
           </span>
@@ -84,7 +84,7 @@ export function Nav() {
             <Link
               key={link.href}
               to={link.href}
-              className="text-[13px] font-medium uppercase tracking-[0.14em] whitespace-nowrap text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
+              className="text-sm font-medium uppercase tracking-label whitespace-nowrap text-muted-foreground transition-colors duration-theme ease hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -132,7 +132,7 @@ export function Nav() {
             }}
             className="site-nav__burger inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-border text-foreground transition-colors duration-theme ease hover:bg-secondary lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="grid gap-[5px] justify-items-center">
+            <span className="grid gap-[0.3125rem] justify-items-center">
               <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />
               <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />
               <span aria-hidden="true" className="block w-4 h-px bg-foreground origin-center" />

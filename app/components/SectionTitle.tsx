@@ -14,7 +14,7 @@ export function SectionTitle({className, children}: Props) {
   return (
     <h2
       className={cn(
-        'mt-4 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl',
+        'mt-4 font-serif text-4xl leading-display tracking-tight text-foreground sm:text-5xl',
         '[&_em]:italic [&_em]:text-primary',
         className,
       )}

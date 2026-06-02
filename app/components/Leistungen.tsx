@@ -51,7 +51,7 @@ export function Leistungen() {
                 'lg:[&:last-child]:border-r-0',
               )}
             >
-              <div className="text-[11px] tracking-[0.2em] text-accent">{`0${i + 1}`}</div>
+              <div className="text-xs tracking-widecaps text-accent">{`0${i + 1}`}</div>
               <h3 className="mt-6 font-serif text-2xl leading-tight text-primary">{item.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.detail}</p>
             </Reveal>

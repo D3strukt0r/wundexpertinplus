@@ -22,7 +22,7 @@ export function UeberMich() {
           {/* Portrait */}
           <Reveal>
             <SectionEyebrow>{t('about.section_number')}</SectionEyebrow>
-            <Card className="mt-5 max-w-[300px] gap-0 overflow-hidden rounded-lg p-0 shadow-none">
+            <Card className="mt-5 max-w-75 gap-0 overflow-hidden rounded-lg p-0 shadow-none">
               <img
                 src={portraitSrc}
                 alt={t('hero.portrait_alt')}
@@ -42,7 +42,7 @@ export function UeberMich() {
                 <br />
                 <em>{t('about.name_part2')}</em>
               </h2>
-              <div className="mt-4 text-sm uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="mt-4 text-sm uppercase tracking-caps text-muted-foreground">
                 {t('about.role_subtitle')}
               </div>
             </Reveal>
@@ -56,8 +56,8 @@ export function UeberMich() {
             <ul className="mt-12 list-none border-t border-border p-0">
               {creds.map((cred, i) => (
                 <Reveal as="li" key={cred.title} delay={i * 90}>
-                  <div className="grid grid-cols-1 gap-1 border-b border-border py-6 sm:grid-cols-[200px_1fr] sm:items-baseline sm:gap-8">
-                    <div className="text-xs uppercase tracking-[0.18em] text-accent">
+                  <div className="grid grid-cols-1 gap-1 border-b border-border py-6 sm:grid-cols-[12.5rem_1fr] sm:items-baseline sm:gap-8">
+                    <div className="text-xs uppercase tracking-caps text-accent">
                       {cred.year ?? t('about.qualification_fallback')}
                     </div>
                     <div>
