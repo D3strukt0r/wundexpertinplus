@@ -4,6 +4,8 @@ meta:
 
 brand:
   name: 'Wund Expertin Plus'
+  short_name: 'Wund Expertin'
+  description: 'Sibylle Bürgi-Lütscher · Dipl. Wundexpertin SAfW · Wundbehandlung in Baselland'
   subtitle: 'Sibylle Bürgi-Lütscher · SAfW'
   role: 'Dipl. Wundexpertin SAfW'
   person: 'Sibylle Bürgi-Lütscher'
@@ -113,6 +115,8 @@ menu:
   open: 'Menü öffnen'
   close: 'Menü schliessen'
 
+scroll_to_top: 'Nach oben scrollen'
+
 footer:
   copyright_content: 'Inhalt © {{years}} Sibylle Bürgi-Lütscher'
   copyright_code: 'Design & Code © {{years}} {{holder}}'
@@ -121,6 +125,8 @@ footer:
 errors:
   generic_title: 'Etwas ist schiefgelaufen'
   unknown: 'Unbekannter Fehler'
+  not_found_title: '404'
+  not_found_message: 'Die angeforderte Seite konnte nicht gefunden werden.'
 
 not_found:
   title: '404'

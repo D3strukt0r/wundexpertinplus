@@ -28,6 +28,12 @@ const DEFAULT_CANDIDATES = [
 //
 //   __COPYRIGHT_YEARS__   e.g. "2020–2026"   ("2026" if single year)
 //   __COPYRIGHT_HOLDER__  e.g. "Jane Doe"
+//
+// The parser accepts any combination of single years and ranges in the LICENSE
+// (e.g. `2026`, `2020-2024`, `2020, 2024, 2026`, `2020, 2022-2024, 2026, 2027-2030`)
+// and collapses them to a single first–last range for the footer, which is the
+// standard footer-copyright form — the comma+range form belongs in the LICENSE
+// file, the range form belongs in presentation.
 export function copyrightFromLicense(opts: Options = {}): Plugin {
   return {
     name: 'copyright-from-license',
@@ -62,6 +68,8 @@ function parseLicense(license: string): {years: string; holder: string} {
   if (marker === null) {
     return {years: '', holder: ''};
   }
+  // Slice everything after the marker up to the end of that line, then trim.
+  // Avoids any greedy regex traversal of the whole LICENSE body.
   const tailStart = marker.index + marker[0].length;
   const newline = license.indexOf('\n', tailStart);
   const tail = newline === -1 ? license.slice(tailStart) : license.slice(tailStart, newline);

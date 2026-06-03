@@ -3,7 +3,8 @@
 // `map.controls[ControlPosition.TOP_LEFT]`, so it lives outside React's
 // render tree — Tailwind utility classes are awkward to set there and
 // SCSS reads cleaner. The other map pieces (canvas, fallback, container)
-// are React-rendered and use Tailwind directly.
+// are React-rendered and use Tailwind directly. Tokens are the shadcn
+// semantic names so the card tracks the light/dark flip.
 
 .map-place-card {
   display: flex;
@@ -11,11 +12,11 @@
   gap: 0.125rem;
   margin: 0.75rem;
   padding: 0.625rem 0.875rem;
-  background: var(--paper);
-  color: var(--ink);
-  border: 0.0625rem solid var(--line);
-  border-radius: 0.375rem;
-  box-shadow: 0 0.375rem 1rem -0.625rem var(--shadow-soft);
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 0.0625rem solid var(--border);
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: 0 0.375rem 1rem -0.625rem oklch(25.1% 0.0350 163.6deg / 0.35);
   text-decoration: none;
   font-size: 0.75rem;
   letter-spacing: 0.02em;
@@ -23,24 +24,24 @@
   transition: background var(--theme-transition) ease, border-color var(--theme-transition) ease;
 
   &:hover {
-    background: var(--bg-deep);
-    border-color: var(--ink-soft);
+    background: var(--secondary);
+    border-color: var(--muted-foreground);
   }
 
   &:focus-visible {
-    outline: 0.125rem solid var(--green);
+    outline: 0.125rem solid var(--ring);
     outline-offset: 0.125rem;
   }
 
   &__name {
-    font-family: var(--serif);
+    font-family: var(--font-serif);
     font-size: 1rem;
-    color: var(--green);
+    color: var(--primary);
     letter-spacing: -0.005em;
   }
 
   &__addr {
-    color: var(--ink-soft);
+    color: var(--muted-foreground);
   }
 
   &__link {
@@ -48,6 +49,6 @@
     font-size: 0.6875rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--primary);
   }
 }

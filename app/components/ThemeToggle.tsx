@@ -1,21 +1,25 @@
-import classNames from 'classnames';
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import MoonIcon from '~/assets/icons/moon.svg?react';
 import SunIcon from '~/assets/icons/sun.svg?react';
 import {useTheme} from '~/hooks/useTheme';
+import {cn} from '~/lib/utils';
 
 interface Props {
   // Mobile nav uses a slightly smaller variant.
   size?: 'sm' | 'md';
 }
 
-const BUTTON = classNames(
+// Rounded-square icon toggle (matches the prototype's `rounded-md` border
+// button — distinct from the page's pill CTAs). The icon swap is CSS-driven,
+// not React-rendered, so it follows the `html.dark` cascade and crossfades on
+// theme flip without a re-render.
+const BUTTON = cn(
   'inline-flex items-center justify-center shrink-0 relative overflow-hidden',
-  'rounded-full border border-line bg-transparent text-ink cursor-pointer',
-  'transition-[background,border-color,color] duration-theme ease',
-  'hover:bg-bg-deep hover:border-ink-soft',
-  'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
+  'rounded-md border border-border bg-transparent text-foreground cursor-pointer',
+  'transition-colors duration-theme ease',
+  'hover:bg-secondary',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
   // No JS = no meaningful click target.
   'no-js:hidden',
 );
@@ -27,7 +31,7 @@ const BUTTON = classNames(
 // `translate` and `rotate` (not `transform`) — Tailwind v4 compiles
 // translate-y-* / rotate-* utilities to the modern individual CSS
 // properties, so the transition list must name them directly.
-const ICON_SLOT = classNames(
+const ICON_SLOT = cn(
   'absolute inline-flex',
   'transition-[translate,rotate,opacity] duration-theme ease-soft',
 );
@@ -58,16 +62,16 @@ export function ThemeToggle({size = 'md'}: Props) {
       // right icon regardless of which side wins the markup race.
       suppressHydrationWarning
       type="button"
-      className={classNames(BUTTON, size === 'sm' ? 'w-8 h-8' : 'w-9 h-9')}
+      className={cn(BUTTON, size === 'sm' ? 'w-9 h-9' : 'w-10 h-10')}
       onClick={toggle}
       aria-label={label}
       title={label}
       aria-pressed={mounted ? isDark : undefined}
     >
-      <span className={classNames(ICON_SLOT, MOON_SLOT)}>
+      <span className={cn(ICON_SLOT, MOON_SLOT)}>
         <MoonIcon width={iconPx} height={iconPx} aria-hidden="true" />
       </span>
-      <span className={classNames(ICON_SLOT, SUN_SLOT)}>
+      <span className={cn(ICON_SLOT, SUN_SLOT)}>
         <SunIcon width={iconPx} height={iconPx} aria-hidden="true" />
       </span>
     </button>

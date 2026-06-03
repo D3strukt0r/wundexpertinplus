@@ -194,14 +194,12 @@ Nav target hrefs in `de.yml` are absolute (`/#kontakt`), not bare hash (`#kontak
 
 ### Site hostname (`SITE_HOST`)
 
-The deployed hostname is **not** stored in the repo. Settings → Pages → Custom domain on the GitHub repo is the source of truth. CI workflows fetch it via `gh api "repos/{owner}/{repo}/pages" --jq '.cname'`, fail fast with `::error::` if it's empty or unreachable, and export it to the build as `SITE_HOST`.
+The deployed hostname is **not** stored in the repo, and how it's resolved differs by deploy target.
 
-- `vite.config.ts` reads `process.env.SITE_HOST` (falling back to `localhost` for local dev) and feeds `https://${SITE_HOST}` to `vite-plugin-sitemap` and `vite-plugin-robots-ts`.
-- `deploy-gh-pages.yml` reads the value before `pnpm build` and passes it as a build-step env var.
-- `docker.yml` reads the value once in the `setup` job, fans it out via job output to every arch in the build matrix, and passes it as `SITE_HOST` to `nix build`. Workflow declares `pages: read` permission for the API call.
-- `flake.nix` forwards it into the pnpm derivation: `SITE_HOST = builtins.getEnv "SITE_HOST";` (requires `--impure`, which the docker workflow already uses for `DOCKER_LABELS_JSON`).
+- **SPA (GitHub Pages):** `deploy-gh-pages.yml` fetches the Custom domain via `gh api "repos/{owner}/{repo}/pages" --jq '.cname'` (fails fast with `::error::` if empty) and exports it as `SITE_HOST` for `SSR=false pnpm build`. `vite.config.ts` reads `process.env.SITE_HOST` (falls back to `localhost`) and bakes `https://${SITE_HOST}` into the static `sitemap.xml` / `robots.txt` — each emitted by its own build plugin (`app/vite/plugins/{sitemap,robots}.ts`, via `this.emitFile`) only in SPA mode (gated on `SSR === 'false'`).
+- **SSR image:** no build-time host. `sitemap.xml` / `robots.txt` are served as resource routes (`app/routes/{sitemap-xml,robots-txt}.ts`, registered only when SSR) that import each plugin's `render*` fn and resolve the host **per request** via `resolveSiteUrl` in `app/lib/site-url.ts`: explicit `SITE_HOST` env (e.g. set in a `compose` file) wins, else the `X-Forwarded-Host` / `Host` header, else the request URL host. `docker.yml` and `flake.nix` therefore no longer pass `SITE_HOST`.
 
-If you need a different hostname for one build (rare — e.g. local prod-like preview), set `SITE_HOST=example.com pnpm build`.
+For a one-off SPA build with a specific host, set `SITE_HOST=example.com SSR=false pnpm build`.
 
 ## Production image (Nix-built OCI)
 
@@ -210,13 +208,12 @@ If you need a different hostname for one build (rare — e.g. local prod-like pr
 - **Build**: `nix build .#dockerImage` → `./result` is a docker-load-able tarball.
 - **Runtime layout**: app lives at `/opt/wundexpertinplus/{build,node_modules,package.json}`. User `nonroot:65532`. CMD `react-router-serve ./build/server/index.js`. Healthcheck `curl -fsS http://localhost:3000/` every 30 s.
 - **`pnpmDeps.hash`** is a fixed-output hash. Every lockfile change → new hash. First build with a stale hash fails with `specified: X / got: Y` — copy the `got` value in. `.github/scripts/bump-pnpm-hash.sh` automates the swap-to-fakeHash → read-`got:` → write-back cycle; `bump-pnpm-hash.yml` runs it on push.
-- **`SITE_HOST`** is a derivation attribute (`SITE_HOST = builtins.getEnv "SITE_HOST";`). Empty when unset → Vite's localhost fallback; CI sets it from the GH Pages API. See *Site hostname* above.
 
 ## Workflows
 
 - **`ci.yml`** — lint + typecheck + build + tests on every PR / push.
 - **`deploy-gh-pages.yml`** — fetches the Custom domain via `gh api .../pages --jq .cname`, exports it as `SITE_HOST`, runs `SSR=false pnpm build`, uploads via `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`. Fails fast if the API returns no custom domain.
-- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. Reads the Pages custom domain once in `setup`, fans it out via job output to every arch in the `build` matrix as `SITE_HOST`. Requires `pages: read` permission (declared workflow-wide).
+- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. The image resolves its host at runtime (resource routes), so the build no longer reads the Pages domain.
 - **`bump-pnpm-hash.yml`** — push-triggered when `pnpm-lock.yaml` / `package.json` changes; runs `.github/scripts/bump-pnpm-hash.sh` to refresh `pnpmDeps.hash` in `flake.nix`. Requires `GH_PAT`.
 - **`release.yml`** — `googleapis/release-please-action@v5`. Manages `package.json` (`version`) + `flake.nix` (`version = "X.Y.Z"; # x-release-please-version`). Uses `GH_PAT`.
 

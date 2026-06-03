@@ -4,7 +4,9 @@
     "**/*",
     "**/.server/**/*",
     "**/.client/**/*",
-    ".react-router/types/**/*"
+    ".react-router/types/**/*",
+    "workers/**/*",
+    "worker-configuration.d.ts"
   ],
   "compilerOptions": {
     "types": ["node", "vite/client", "google.maps"],

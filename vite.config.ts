@@ -1,78 +1,98 @@
-import type {Plugin} from 'vite';
-import {mkdirSync} from 'node:fs';
 import {join} from 'node:path';
 import process from 'node:process';
+import {cloudflare} from '@cloudflare/vite-plugin';
 import ViteYaml from '@modyfi/vite-plugin-yaml';
 import {reactRouter} from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
-import {ALLOW_ALL, robots} from 'vite-plugin-robots-ts';
-import sitemap from 'vite-plugin-sitemap';
 import svgr from 'vite-plugin-svgr';
 import {defineConfig} from 'vitest/config';
 import {copyrightFromLicense} from './app/vite/plugins/copyright-from-license';
 import {faviconRasters} from './app/vite/plugins/favicon-rasters';
+import {robots} from './app/vite/plugins/robots';
+import {sitemap} from './app/vite/plugins/sitemap';
 import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {webManifest} from './app/vite/plugins/web-manifest';
 
-const isVitest = process.env.VITEST === 'true';
+const WEB_MANIFEST_ICONS = [
+  {size: 192, out: 'web-app-manifest-192x192.png', purpose: 'maskable'},
+  {size: 512, out: 'web-app-manifest-512x512.png', purpose: 'maskable'},
+] as const;
 
-// Single source of truth for the deployed hostname: Settings → Pages →
-// Custom domain on the GitHub repo. CI workflows (deploy-gh-pages.yml,
-// docker.yml) fetch it via the Pages REST API and pass it in as
-// SITE_HOST; sitemap + robots read it here. Local dev falls back to
-// localhost because no env var is set.
+const isVitest = process.env.VITEST === 'true';
+// SSR serves the SEO artifacts as runtime resource routes; only the SPA
+// (GitHub Pages) build emits them as static files (host known at build time).
+const isSpa = process.env.SSR === 'false';
+// Third deploy target: Cloudflare Workers SSR. Gated on CLOUDFLARE=true so the
+// GitHub-Pages SPA and the Node/Nix Docker SSR builds are untouched. The
+// plugin clashes with vitest's environment, so skip it under VITEST too.
+const isCloudflare = process.env.CLOUDFLARE === 'true';
+
+// Deployed hostname for the SPA build's static SEO files. CI's
+// deploy-gh-pages.yml passes it as SITE_HOST (from the Pages custom domain);
+// local dev falls back to localhost. The SSR image ignores this and resolves
+// the host per request (app/lib/site-url.ts).
 const trimmedHost = process.env.SITE_HOST?.trim();
 const SITE_HOST = trimmedHost === undefined || trimmedHost === '' ? 'localhost' : trimmedHost;
 const SITE_URL = `https://${SITE_HOST}`;
-const OUT_DIR = 'build/client';
-const absOutDir = join(process.cwd(), OUT_DIR);
-
-// sitemap + robots close their bundle hooks before react-router has flushed
-// assets to build/client on a cold build, so the dir might not exist yet.
-mkdirSync(absOutDir, {recursive: true});
-
-// react-router 7 runs Vite with multiple environments (client, ssr). Scope
-// sitemap + robots to the client build so their closeBundle hooks don't fire
-// for the SSR output (which lives at build/server/).
-function clientOnly(plugin: Plugin): Plugin {
-  return {...plugin, applyToEnvironment: (env) => env.name === 'client'};
-}
 
 export default defineConfig({
   plugins: [
+    // Cloudflare Workers SSR target (CLOUDFLARE=true). Must come first so it can wrap
+    // the dev/build pipeline before reactRouter() runs.
+    ...(isCloudflare && !isVitest
+      ? [
+          cloudflare({viteEnvironment: {name: 'ssr'}})]
+      : []),
     tailwindcss(),
     // Pulls year(s) + holder from LICENSE.txt and exposes them as
     // build-time globals (__COPYRIGHT_YEARS__, __COPYRIGHT_HOLDER__) so
     // the footer copyright stays in lockstep with the legal artefact.
     copyrightFromLicense(),
-    // Rasterises `public/favicon.svg` to PNG + multi-resolution ICO during
-    // the client build. Modern browsers use the SVG directly; these are
-    // fallbacks for older platforms.
-    faviconRasters(),
-    // Emits `site.webmanifest` at build time. Shares the icon set with
-    // `faviconRasters` via `app/config/web-manifest.ts`; sources `name`
-    // from the locale YAML's `brand.name` so a single edit in `de.yml`
-    // propagates to the PWA install title.
-    webManifest(),
+    // Rasterises `app/assets/brand/plaster-plus.svg` to PNG + multi-resolution
+    // ICO during the client build. Modern browsers use the SVG directly;
+    // these are fallbacks for older platforms. The PNG set merges the
+    // favicon-only sizes with the shared PWA manifest icons so the rasters
+    // and the manifest stay in lockstep.
+    faviconRasters({
+      source: join('app', 'assets', 'brand', 'plaster-plus.svg'),
+      svgOut: 'favicon.svg',
+      icoOut: 'favicon.ico',
+      pngs: [
+        {size: 96, out: 'favicon-96x96.png'},
+        {size: 180, out: 'apple-touch-icon.png'},
+        ...WEB_MANIFEST_ICONS.map((i) => ({size: i.size, out: i.out})),
+      ],
+      icoSizes: [16, 32, 48],
+    }),
+    // Emits `site.webmanifest` at build time. Shares its icon set with
+    // `faviconRasters`; sources the text fields from the locale YAML's
+    // `brand.*` so a single edit in `de.yml` propagates to the PWA listing.
+    webManifest({
+      locale: join('app', 'locales', 'de.yml'),
+      out: 'site.webmanifest',
+      keys: {name: 'brand.name', short_name: 'brand.short_name', description: 'brand.description'},
+      // Static knobs; colours are sRGB hex (precomputed from OKLCH — some
+      // Android launchers don't parse `oklch(...)`).
+      manifest: {lang: 'de', display: 'standalone', theme_color: '#f4efe6', background_color: '#f4efe6'},
+      icons: WEB_MANIFEST_ICONS,
+    }),
     // react-router's vite plugin clashes with vitest's environment setup, so
     // skip it when running tests.
     ...(isVitest ? [] : [reactRouter()]),
     ViteYaml(),
     svgr({include: '**/*.svg?react'}),
-    clientOnly(sitemap({
-      hostname: SITE_URL,
-      outDir: OUT_DIR,
-      dynamicRoutes: ['/'],
-      generateRobotsTxt: false,
-    })),
-    clientOnly(robots({
-      content: `${ALLOW_ALL}\n`,
-      sitemap: `${SITE_URL}/sitemap.xml`,
-    })),
-    // Not wrapped in clientOnly: react-router writes build/client/index.html
-    // during the SSR build pass, after the client env's closeBundle has fired.
-    // Running on both envs lets the copy succeed on the SSR pass.
-    spaFallback({outDir: absOutDir}),
+    // sitemap.xml / robots.txt as static files — SPA build only, each via its
+    // own plugin's render fn (the SSR image serves the same through resource
+    // routes, resolving the host per request).
+    ...(isSpa
+      ? [
+          sitemap({siteUrl: SITE_URL, paths: ['/']}),
+          robots({siteUrl: SITE_URL}),
+        ]
+      : []),
+    // Copies build/client/index.html → 404.html (GitHub Pages SPA fallback).
+    // Reads build/client itself; SSR builds emit no index.html there → no-op.
+    spaFallback(),
   ],
   resolve: {
     tsconfigPaths: true,

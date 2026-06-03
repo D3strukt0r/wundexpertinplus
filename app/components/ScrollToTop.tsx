@@ -1,7 +1,7 @@
-import classNames from 'classnames';
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import ArrowUpIcon from '~/assets/icons/arrow-up.svg?react';
+import {cn} from '~/lib/utils';
 
 // Fixed-position button bottom-right of the viewport. Appears once the user
 // has scrolled past the threshold; click smooth-scrolls to the top.
@@ -12,19 +12,18 @@ import ArrowUpIcon from '~/assets/icons/arrow-up.svg?react';
 // smooth scroll also disables this one. No JS branching needed.
 const SCROLL_THRESHOLD_PX = 400;
 
-const BASE = classNames(
+const BASE = cn(
   'fixed right-4 bottom-4 md:right-6 md:bottom-6',
   'w-10 h-10 md:w-11 md:h-11 z-50',
   'inline-flex items-center justify-center cursor-pointer',
-  'rounded-full border border-line bg-paper text-ink',
+  'rounded-full border border-border bg-card text-foreground',
   'shadow-hover',
   // `translate`, not `transform` — Tailwind v4 `translate-y-*` compiles to
   // the modern `translate` CSS property, so the transition list has to
-  // name it explicitly. Opacity uses the same 0.25s ease curve as the
-  // slide so the fade and slide settle together.
+  // name it explicitly. Opacity uses the same soft ease curve as the slide.
   'transition-[opacity,translate,background-color,border-color,color] duration-theme ease-soft',
-  'hover:bg-bg-deep hover:border-ink-soft',
-  'focus-visible:outline-2 focus-visible:outline-green focus-visible:outline-offset-2',
+  'hover:bg-secondary',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
   // Hide when JS hasn't loaded — the visibility logic lives in React.
   'no-js:hidden',
 );
@@ -48,7 +47,7 @@ export function ScrollToTop() {
   return (
     <button
       type="button"
-      className={classNames(BASE, {
+      className={cn(BASE, {
         'opacity-100 translate-y-0': visible,
         'opacity-0 translate-y-2 pointer-events-none': !visible,
       })}

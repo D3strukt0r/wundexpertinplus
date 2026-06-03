@@ -45,7 +45,7 @@
             pnpmDeps = pkgs.pnpm_10.fetchDeps {
               inherit (finalAttrs) pname version src;
               fetcherVersion = 2;
-              hash = "sha256-X3mBFIQDRIaKBuOuG4I/KZ24Ji59kVVDBJnjbQmMK/w=";
+              hash = "sha256-OZrylVNUJ/riN1HJytmJmIuvQOyA7zllMQ/Zp5MEgzs=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
@@ -61,12 +61,6 @@
             dontPatchELF = true;
 
             disallowedReferences = [ pkgs.nodejs_24 ];
-
-            # Forwarded into the build env so vite.config.ts can read
-            # process.env.SITE_HOST (the workflow fetches the value from
-            # GitHub Pages settings via the REST API and exports it).
-            # Empty when unset; vite.config.ts falls back to 'localhost'.
-            SITE_HOST = builtins.getEnv "SITE_HOST";
 
             buildPhase = ''
               runHook preBuild

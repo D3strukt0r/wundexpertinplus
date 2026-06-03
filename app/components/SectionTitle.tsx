@@ -1,14 +1,24 @@
 import type {ReactNode} from 'react';
+import {cn} from '~/lib/utils';
 
 interface Props {
+  className?: string;
   children: ReactNode;
 }
 
-// Display heading shared by every desktop-style section (Leistungen, Ueber).
-// `<em>` inside renders italic + green for the emphasised phrase.
-export function SectionTitle({children}: Props) {
+// Display heading shared by the desktop-style sections (Leistungen, Über mich).
+// `<em>` inside renders italic + primary for the emphasised phrase. The
+// `[&_em]:text-primary` token is animated via the `-webkit-text-fill-color`
+// rule in _base.scss so it crossfades on theme flip without stalling.
+export function SectionTitle({className, children}: Props) {
   return (
-    <h2 className="font-serif font-normal text-4xl md:text-6xl leading-none tracking-normal text-ink m-0 [&_em]:italic [&_em]:text-green">
+    <h2
+      className={cn(
+        'mt-4 font-serif text-4xl leading-display tracking-tight text-foreground sm:text-5xl',
+        '[&_em]:italic [&_em]:text-primary',
+        className,
+      )}
+    >
       {children}
     </h2>
   );

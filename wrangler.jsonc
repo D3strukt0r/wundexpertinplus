@@ -1,0 +1,17 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "wundexpertinplus",
+	"compatibility_date": "2025-04-04",
+	"main": "./workers/app.ts",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	},
+	"upload_source_maps": true
+	// No SITE_HOST var: there is no public/CNAME, so the SSR runtime resolves
+	// the host per request (app/lib/site-url.ts → X-Forwarded-Host / Host).
+}

@@ -1,11 +1,11 @@
 import type {ReactNode} from 'react';
-import classNames from 'classnames';
 import {useTranslation} from 'react-i18next';
 import ConcentricRings from '~/assets/decor/concentric-rings.svg?react';
 import ArrowIcon from '~/assets/icons/arrow-up-right.svg?react';
 import LinkedInIcon from '~/assets/icons/linkedin.svg?react';
 import MailIcon from '~/assets/icons/mail.svg?react';
 import PhoneIcon from '~/assets/icons/phone.svg?react';
+import {cn} from '~/lib/utils';
 import {Container} from './Container';
 import {Footer} from './Footer';
 import {MapBox} from './MapBox';
@@ -20,34 +20,32 @@ interface TileProps {
   emailLike?: boolean;
 }
 
-// One contact card (phone / email / LinkedIn). Frosted-white pill against
-// the always-green Kontakt panel. Icon sits in a tan-fixed circle so the
-// pairs read at a glance.
+// One contact method (phone / email / LinkedIn). Frosted-cream pill against
+// the always-dark-green Kontakt panel; the icon sits in a tan-fixed circle so
+// the pairs read at a glance. All tokens are theme-fixed (cream / tan / green
+// stay identical in both modes).
 function Tile({href, external, icon, label, value, emailLike}: TileProps) {
   return (
     <a
       href={href}
       {...(external === true ? {target: '_blank', rel: 'noreferrer'} : {})}
-      className={classNames(
-        'flex items-center gap-3.5 py-stack px-5 md:gap-stack md:py-stack-lg md:px-7',
-        'bg-paper-fixed/[0.06] border border-paper-fixed/[0.18] rounded-md text-paper-fixed no-underline',
-        'transition-[background,border-color] duration-theme ease',
-        'hover:bg-paper-fixed/[0.1] hover:border-paper-fixed/[0.3]',
+      className={cn(
+        'flex items-center gap-4 rounded-lg border border-paper-fixed/15 bg-paper-fixed/[0.06] px-6 py-5',
+        'transition-colors duration-theme ease hover:bg-paper-fixed/[0.12]',
       )}
     >
-      <span className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-tan-fixed text-green-fixed grid place-items-center shrink-0">
+      <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent-fixed text-primary-fixed">
         {icon}
       </span>
-      <span className={emailLike === true ? 'min-w-0 overflow-hidden' : undefined}>
-        <span className="block text-xs tracking-eyebrow-wide text-tan-fixed">
-          {label}
-        </span>
+      <span className={emailLike === true ? 'min-w-0' : undefined}>
+        <span className="block text-xs tracking-eyebrow text-accent-fixed">{label}</span>
         <span
-          className={classNames(
-            'block font-serif mt-0.5 text-xl md:text-2xl',
-            // Email addresses contain no spaces; allow mid-word breaking
-            // so the line wraps inside the tile instead of overflowing.
-            {'break-all': emailLike === true},
+          className={cn(
+            'mt-0.5 block font-serif text-lg sm:text-xl',
+            // All three tiles share one size. Email addresses contain no spaces,
+            // so allow mid-word breaking to wrap inside the tile instead of
+            // overflowing.
+            emailLike === true ? 'break-all' : undefined,
           )}
         >
           {value}
@@ -68,31 +66,32 @@ export function Kontakt() {
   return (
     <section
       id="kontakt"
-      className="relative overflow-hidden bg-green-fixed text-paper-fixed py-15 pb-10 md:py-30 md:pb-15"
+      className="relative overflow-hidden bg-primary-fixed text-paper-fixed"
     >
       <ConcentricRings
         aria-hidden="true"
-        className="absolute -left-60 -bottom-65 w-175 h-175 opacity-10 text-tan-fixed pointer-events-none"
+        className="pointer-events-none absolute -left-56 -bottom-60 h-176 w-176 text-accent-fixed/15"
       />
 
-      <Container className="relative">
+      <Container className="relative py-16 lg:py-24">
         <Reveal>
-          <div className="text-xs tracking-eyebrow-widest uppercase text-tan-fixed font-semibold mb-stack-lg">
+          <div className="text-xs uppercase tracking-hero text-accent-fixed">
             {t('kontakt.section_number')}
           </div>
-          <h2 className="font-serif font-normal text-4xl md:text-7xl m-0 leading-none tracking-tight max-w-225 text-paper-fixed [&_em]:italic [&_em]:text-tan-fixed">
-            {t('kontakt.title_part1')}<br />
+          <h2 className="mt-5 max-w-3xl font-serif text-5xl leading-display tracking-tight sm:text-6xl lg:text-7xl [&_em]:italic [&_em]:text-accent-fixed">
+            {t('kontakt.title_part1')}{' '}
             <em>{t('kontakt.title_emphasis')}</em> {t('kontakt.title_part2')}
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-7 mt-8 lg:grid-cols-2 lg:gap-16 md:mt-20">
+        <div className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-2 lg:gap-16">
+          {/* Contact methods + perks */}
           <Reveal delay={100}>
-            <p className="text-lg leading-relaxed text-paper-fixed/[0.78] m-0 mb-10 max-w-115">
+            <p className="max-w-md text-lg leading-relaxed text-paper-fixed/75">
               {t('kontakt.intro')}
             </p>
 
-            <div className="flex flex-col gap-stack">
+            <div className="mt-9 flex flex-col gap-3.5">
               <Tile
                 href={telHref}
                 icon={<PhoneIcon width={18} height={18} aria-hidden="true" />}
@@ -101,7 +100,7 @@ export function Kontakt() {
               />
               <Tile
                 href={`mailto:${email}`}
-                icon={<MailIcon width={16} height={16} aria-hidden="true" />}
+                icon={<MailIcon width={18} height={18} aria-hidden="true" />}
                 label={t('kontakt.email_label')}
                 value={email}
                 emailLike
@@ -115,11 +114,11 @@ export function Kontakt() {
               />
             </div>
 
-            <ul className="list-none p-0 mt-7 pt-6 border-t border-paper-fixed/[0.18] flex flex-wrap gap-2">
+            <ul className="mt-7 flex list-none flex-wrap gap-2 p-0">
               {perks.map((perk) => (
                 <li
                   key={perk}
-                  className="text-xs tracking-wider py-2 px-3.5 bg-paper-fixed/[0.08] text-paper-fixed rounded-full border border-paper-fixed/[0.22]"
+                  className="inline-flex items-center gap-2 rounded-full border border-paper-fixed/20 bg-paper-fixed/[0.08] px-3.5 py-2 text-xs tracking-wide text-paper-fixed"
                 >
                   {perk}
                 </li>
@@ -127,20 +126,21 @@ export function Kontakt() {
             </ul>
           </Reveal>
 
+          {/* Praxis card with map */}
           <Reveal delay={200}>
-            <article className="bg-paper text-ink rounded-md overflow-hidden">
+            <article className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
               <MapBox />
-              <div className="p-stack-lg pb-6 md:pt-8 px-9 pb-10">
-                <div className="text-xs tracking-eyebrow-wide uppercase text-green font-semibold mb-2.5">
+              <div className="p-8">
+                <div className="text-xs uppercase tracking-eyebrow text-primary">
                   {t('kontakt.praxis.eyebrow')}
                 </div>
-                <h3 className="font-serif font-normal text-xl md:text-2xl leading-tight m-0">
+                <h3 className="mt-2.5 font-serif text-2xl leading-snug text-foreground">
                   {t('kontakt.praxis.partner')}
                 </h3>
-                <p className="text-sm text-ink-soft m-0 mt-1 italic">
+                <p className="mt-1 text-sm italic text-muted-foreground">
                   {t('kontakt.praxis.sub')}
                 </p>
-                <address className="mt-7 text-sm md:text-base leading-relaxed not-italic [&_div]:block">
+                <address className="mt-6 text-base not-italic leading-relaxed text-foreground [&_div]:block">
                   {address.map((line) => (
                     <div key={line}>{line}</div>
                   ))}
@@ -149,17 +149,17 @@ export function Kontakt() {
                   href={t('kontakt.praxis.url')}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2.5 mt-stack text-green text-sm no-underline border-b border-green pb-0.5"
+                  className="mt-5 inline-flex items-center gap-2 border-b border-primary pb-0.5 text-sm text-primary transition-colors duration-theme ease hover:border-transparent"
                 >
                   {t('kontakt.praxis.url_label')}
-                  <ArrowIcon width={14} height={14} aria-hidden="true" />
+                  <ArrowIcon width={16} height={16} aria-hidden="true" />
                 </a>
               </div>
             </article>
           </Reveal>
         </div>
 
-        <div className="mt-20">
+        <div className="mt-16 lg:mt-24">
           <Footer />
         </div>
       </Container>

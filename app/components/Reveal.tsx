@@ -1,32 +1,29 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
-import classNames from 'classnames';
-import {useReveal} from '~/hooks/useReveal';
+import type {ReactNode, Ref} from 'react';
+import {useGsapReveal} from '~/hooks/useGsapReveal';
 
 interface RevealProps {
-  // Delay before this element's transition begins (ms). Stack offsets across
-  // siblings to create the staggered fade-and-rise sweep from the prototype.
+  // Stagger offset (ms) before this element begins its entrance. Offsetting
+  // siblings produces the cascading fade-and-rise sweep from the prototype.
   delay?: number;
-  // Override the rendered tag if a non-`div` element would be more semantic.
+  // Override the rendered tag when a non-`div` element is more semantic.
   as?: 'div' | 'section' | 'article' | 'header' | 'p' | 'li';
   className?: string;
-  style?: CSSProperties;
   children: ReactNode;
 }
 
-// Element-level entrance: fades from 0→1, rises 14px→0, eased over 900ms.
-// Each Reveal owns its own IntersectionObserver via useReveal so triggering
-// is independent across siblings — needed for the staggered effect.
-export function Reveal({delay = 0, as: Tag = 'div', className, style, children}: RevealProps) {
-  const [ref, shown] = useReveal<HTMLElement>();
+// Element-level scroll reveal. The hidden start state is applied imperatively
+// by `useGsapReveal` (never via CSS / inline style), so without JS — or before
+// hydration on the prerendered page — the element renders fully visible. See
+// `useGsapReveal` for the bidirectional + reduced-motion contract.
+export function Reveal({delay = 0, as: Tag = 'div', className, children}: RevealProps) {
+  const ref = useGsapReveal<HTMLElement>({delay});
   return (
     <Tag
-      // TS computes the union of element types in the `as` prop as an
-      // intersection of refs (ref must be all element types at once),
-      // which no single ref can satisfy. The ref is consumed by
-      // IntersectionObserver, which doesn't care about the element type.
+      // The `as` union widens the ref to an intersection of element types that
+      // no single ref can satisfy; the ref is only read by GSAP, which doesn't
+      // care about the concrete element type.
       ref={ref as Ref<HTMLElement & HTMLLIElement & HTMLParagraphElement>}
-      className={classNames('reveal', {'is-shown': shown}, className)}
-      style={{transitionDelay: `${delay}ms`, ...style}}
+      className={className}
     >
       {children}
     </Tag>

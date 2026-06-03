@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Tailwind theme: only tokens we want Tailwind to consume directly.
    Colours stay in _tokens.scss because the runtime light/dark flip relies
@@ -7,25 +8,17 @@
   /* Cap the container at xl — no 2xl step in this design. */
   --breakpoint-2xl: initial;
 
-  /* Fonts (mirrored in _tokens.scss for legacy --serif/--sans SCSS names). */
+  /* Project-wide default transition duration. Tailwind's `transition-*`
+     utilities (and shadcn's `transition-colors`/`transition-all` on the
+     vendored primitives) fall back to this when no explicit `duration-*`
+     is set — so hover/focus feedback lands on the same 200ms as the theme
+     flip. Keep in lockstep with `--theme-transition` in _tokens.scss. */
+  --default-transition-duration: 200ms;
+
+  /* Fonts. Tailwind emits these to :root, so Sass partials read them via
+     var(--font-serif) / var(--font-sans) and JSX via font-serif / font-sans. */
   --font-serif: "Cormorant Garamond", "Times New Roman", serif;
   --font-sans:  "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-
-  /* Tiny eyebrow caps below text-xs (12px). */
-  --text-micro: 0.625rem;  /* 10px */
-
-  /* Project spacing extensions for the half-step rhythm Tailwind's
-     dynamic scale doesn't cover (4.5 / 5.5 × --spacing). */
-  --spacing-hairline:   0.09375rem; /* 1.5px — burger lines */
-  --spacing-stack:      1.125rem;  /* 18px — common vertical rhythm */
-  --spacing-stack-lg:   1.375rem;  /* 22px — wider rhythm */
-
-  /* Uppercase eyebrow tracking ladder. Tailwind's tracking-widest tops at
-     0.1em; the design pushes wider for caps labels. */
-  --tracking-eyebrow-tight:   0.14em;
-  --tracking-eyebrow:         0.18em;
-  --tracking-eyebrow-wide:    0.22em;
-  --tracking-eyebrow-widest:  0.3em;
 
   /* Custom shadows reference CSS vars so the light/dark cascade still
      flips correctly. */
@@ -34,36 +27,74 @@
 
   /* Soft easing curve used across hover/transition effects. */
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Radius ladder. shadcn primitives reference `rounded-lg/md/sm/xl`; derive
+     them from the single `--radius` token in _tokens.scss so retuning one
+     value re-steps the whole ladder. */
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+
+  /* Font-size scale extensions. */
+  --text-2xs: 0.625rem;                 /* 10px — micro labels below xs */
+  --text-display: 2.75rem;              /* 44px — oversized hero/display text */
+  --text-display--line-height: 1.04;    /* tight line-height paired with text-display */
+
+  /* Letter-spacing tokens for uppercase/eyebrow/quote treatments. */
+  --tracking-label: 0.14em;             /* small UI labels */
+  --tracking-caps: 0.18em;              /* uppercase caps */
+  --tracking-widecaps: 0.2em;           /* wider uppercase caps */
+  --tracking-eyebrow: 0.22em;           /* eyebrow kickers above headings */
+  --tracking-quote: 0.24em;             /* pull-quote spacing */
+  --tracking-hero: 0.3em;               /* hero spaced lettering */
+
+  /* Line-height token for display-size headings. */
+  --leading-display: 1.05;              /* compact leading for large display text */
 }
 
 /* Color tokens — declared in a separate `@theme inline` so Tailwind inlines
-   the var() reference directly into utilities (e.g. `.text-green { color:
-   var(--green); }`) instead of going through a `--color-green: var(--green)`
-   alias. The alias indirection breaks our @property-driven theme transition:
-   `--green` is registered as `<color>` in _tokens.scss and animates on theme
-   flip, but Chrome doesn't propagate that animation through an UNREGISTERED
-   alias on top, so consumers see the brand colour snap at end-of-transition
-   instead of interpolating smoothly. Inlining hands them the registered
-   token directly. */
+   the var() reference directly into utilities (e.g. `.bg-primary { background:
+   var(--primary); }`) instead of going through a `--color-primary:
+   var(--primary)` alias. The alias indirection breaks the theme transition:
+   Chrome doesn't propagate a custom-property animation through an unregistered
+   alias on top, so consumers would see the colour snap at end-of-transition
+   instead of interpolating. Inlining hands them the token directly.
+
+   `@theme inline` is also mandatory for alpha: utilities like `bg-primary/90`
+   / `bg-card/60` compile to `color-mix(in oklab, var(--color-primary) 90%,
+   transparent)` — which needs a full color value (our `oklch(...)` triples
+   are). The legacy `hsl(var(--x)/<alpha-value>)` channel pattern is gone. */
 @theme inline {
-  --color-bg:           var(--bg);
-  --color-bg-deep:      var(--bg-deep);
-  --color-paper:        var(--paper);
-  --color-ink:          var(--ink);
-  --color-ink-soft:     var(--ink-soft);
-  --color-green:        var(--green);
-  --color-green-soft:   var(--green-soft);
-  --color-tan:          var(--tan);
-  --color-tan-deep:     var(--tan-deep);
-  --color-line:         var(--line);
-  --color-header:       var(--header-bg);
-  --color-map:          var(--map-bg);
-  --color-shadow:       var(--shadow-soft);
-  --color-green-fixed:  var(--green-fixed);
-  --color-paper-fixed:  var(--paper-fixed);
-  --color-tan-fixed:    var(--tan-fixed);
-  --color-on-primary:   var(--on-primary);
-  --color-cta-dot:      var(--cta-dot-bg);
+  /* shadcn semantic names → runtime tokens. */
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+
+  /* App-specific extras kept under their own names. The `*-fixed` tokens are
+     identical in both themes and excluded from the theme transition. */
+  --color-primary-fixed:        var(--primary-fixed);
+  --color-paper-fixed:          var(--paper-fixed);
+  --color-accent-fixed:         var(--accent-fixed);
+  --color-map-bg-fixed:         var(--map-bg-fixed);
+
+  /* Shadow helper token still consumed by --shadow-hover above. */
+  --color-shadow:               var(--shadow-soft);
 }
 
 /* Duration aliases — declared as explicit `@utility` rules rather than
@@ -71,38 +102,19 @@
    from `--duration-*` tokens that hold a literal `<time>` value (e.g.
    `150ms`). A `var()` reference (which we need so tuning the runtime
    variable in `_tokens.scss` re-routes everywhere) is silently skipped —
-   so `duration-theme` was falling through to Tailwind's 150ms default
-   and the theme flip snapped in three frames. Defining as `@utility`
-   bypasses the namespace heuristic and emits the class unconditionally. */
+   so `duration-theme` was falling through to Tailwind's default. Defining
+   as `@utility` bypasses the namespace heuristic and emits the class
+   unconditionally. */
 @utility duration-theme {
   transition-duration: var(--theme-transition);
-}
-@utility duration-reveal {
-  transition-duration: var(--reveal-duration);
-}
-
-/* Semantic CSS variables consumed via var(...) in SCSS.
-   Tailwind v4 tree-shakes unused @theme tokens, so these live outside
-   @theme to guarantee emission. They are intentionally not exposed as
-   Tailwind utilities (no `gap-block` etc.) — SCSS reads them directly. */
-:root {
-  --spacing-section-y:     7.5rem;   /* section vertical padding */
-  --spacing-section-x:     3.5rem;   /* section horizontal padding */
-  --spacing-section-mt:    5rem;     /* margin between section bodies */
-  --spacing-block:         4rem;     /* large grid gaps */
-  --spacing-row:           1rem;     /* inline gap */
-  --spacing-gutter-mobile: 1.25rem;  /* mobile horizontal padding */
-
-  --text-eyebrow:          0.75rem;
-  --text-meta:             0.875rem;
-  --text-micro:            0.6875rem;
 }
 
 /* Class-based dark variant. Overrides Tailwind's default `dark:` (which
    uses `prefers-color-scheme: dark`) to follow this project's
    `html.dark` cascade instead. Color tokens already flip via the
    _tokens.scss cascade, so `dark:` is mostly used for transform/opacity
-   utilities on elements like the theme-toggle icon swap. */
+   utilities on elements like the theme-toggle icon swap. `:where()` keeps
+   specificity 0 so utilities still win. */
 @custom-variant dark (&:where(html.dark, html.dark *));
 
 /* `no-js:` — applies when the inline themeBootstrap hasn't added the
@@ -118,7 +130,8 @@
    doesn't snap — it widens by ~15px once viewport > 1280 + scrollbar.
    Setting each cap 1rem below its breakpoint reserves room for the
    scrollbar so the container hits its max-width immediately at every
-   breakpoint and never drifts as the viewport grows further. */
+   breakpoint and never drifts as the viewport grows further. No 2xl step
+   in this design (capped at xl/1264). */
 @utility container {
   width: 100%;
   margin-inline: auto;

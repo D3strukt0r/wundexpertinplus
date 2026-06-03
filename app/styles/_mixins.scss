@@ -23,8 +23,8 @@
 // dark-mode override. Emits `html.dark &` plus the no-JS fallback.
 //
 //   .my-component {
-//     color: var(--ink);
-//     @include in-dark { color: var(--ink-bright); }
+//     color: var(--foreground);
+//     @include in-dark { color: var(--accent); }
 //   }
 @mixin in-dark {
   html.dark & {

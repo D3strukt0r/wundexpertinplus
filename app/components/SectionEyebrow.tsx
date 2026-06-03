@@ -1,13 +1,15 @@
 import type {ReactNode} from 'react';
+import {cn} from '~/lib/utils';
 
 interface Props {
+  className?: string;
   children: ReactNode;
 }
 
-// Small uppercase tag that introduces each section ("02 — LEISTUNGEN").
-export function SectionEyebrow({children}: Props) {
+// Small uppercase tag that introduces each section ("02 — Leistungen").
+export function SectionEyebrow({className, children}: Props) {
   return (
-    <div className="text-xs tracking-eyebrow-widest uppercase text-green font-semibold mb-4.5">
+    <div className={cn('text-xs uppercase tracking-hero text-primary', className)}>
       {children}
     </div>
   );

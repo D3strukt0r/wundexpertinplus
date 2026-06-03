@@ -12,18 +12,18 @@ export default function NotFound() {
       <Nav />
       <main className="flex-1 grid place-items-center p-8 text-center">
         <div>
-          <h1 className="font-serif font-normal text-6xl mb-2 text-green">{t('not_found.title')}</h1>
-          <p className="text-ink-soft m-0 mb-stack-lg">{t('not_found.message')}</p>
+          <h1 className="font-serif text-6xl mb-2 text-primary">{t('not_found.title')}</h1>
+          <p className="text-muted-foreground m-0 mb-6">{t('not_found.message')}</p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2.5 text-green text-sm no-underline border-b border-green pb-0.5"
+            className="inline-flex items-center gap-2 border-b border-primary pb-0.5 text-sm text-primary transition-colors duration-theme ease hover:border-transparent"
           >
             {t('not_found.back_home')}
-            <ArrowIcon width={14} height={14} aria-hidden="true" />
+            <ArrowIcon width={16} height={16} aria-hidden="true" />
           </Link>
         </div>
       </main>
-      <section className="bg-green-fixed text-paper-fixed py-10">
+      <section className="bg-primary-fixed text-paper-fixed py-10">
         <Container>
           <Footer />
         </Container>

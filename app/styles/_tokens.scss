@@ -1,77 +1,76 @@
-// Design tokens — palette + type.
-// Light is default; the `dark` mixin flips the runtime variables under both
-// `html.dark` (JS path) and `prefers-color-scheme: dark` on unset html
-// (no-JS path). Component rules consume the variables only — never the raw
-// colour literals.
+// Design tokens — shadcn/ui semantic palette in OKLCH + project type/motion.
 //
-// Theme class lives on <html> (not <body>) so the bootstrap script can set
-// it from <head> before any stylesheet evaluates — see `themeBootstrap` in
-// `app/root.tsx`. With the class on :root before the body element exists,
-// the global body cross-fade transition has nothing to animate on load.
+// Light is default (`:root`); the `dark` mixin flips the runtime variables
+// under both `html.dark` (JS path) and `prefers-color-scheme: dark` on unset
+// html (no-JS path). Component rules and Tailwind utilities consume the
+// variables only — never the raw colour literals.
 //
-// Colours expressed in `oklch()` for perceptual uniformity (the design
-// handoff supplied hex; values here converted via culori one-off so dev/dark
-// shades stay computable and the gamut on capable displays is wider). The
-// `--green-fixed` / `--paper-fixed` pair is intentionally NOT themed: the
-// Kontakt section stays dark-green-with-cream type in both modes so the
-// cream-on-green CTAs inside keep their identity.
+// Theme class lives on <html> (not <body>) so the bootstrap script can set it
+// from <head> before any stylesheet evaluates — see `themeBootstrap` in
+// `app/root.tsx`. With the class on :root before the body element exists, the
+// global body cross-fade transition has nothing to animate on load.
 //
-// The Tailwind `--color-*` aliases (defined in tailwind.css `@theme` as
-// `--color-paper: var(--paper)` etc.) only need declaring at `:root` — they
-// don't need a per-scope redeclaration inside the dark cascade. `var()`
-// substitution happens at the consuming element's computed-value time, so
-// at any descendant of `html.dark`, `var(--color-paper)` resolves through
-// the cascaded (dark) value of `--paper`.
+// Colours expressed in `oklch(L% C Hdeg)` for perceptual uniformity (the
+// design handoff supplied HSL; converted once via culori so dev/dark shades
+// stay computable and the gamut on capable displays is wider). The
+// `--*-fixed` tokens are intentionally NOT themed: the Kontakt section stays
+// dark-green-with-cream type in both modes so the cream-on-green CTAs inside
+// keep their identity — they are excluded from the per-utility theme
+// transition in `_base.scss`.
+//
+// The Tailwind `--color-*` aliases live in `tailwind.css` `@theme inline`
+// (`--color-primary: var(--primary)` etc.) and only need declaring once — at
+// the consuming element's computed-value time `var()` resolves through the
+// cascaded (dark) value of `--primary` for any descendant of `html.dark`.
 
 @use 'mixins' as *;
 
 :root {
-  --bg:           oklch(95.4% 3.25% 82.4deg);
-  --bg-deep:      oklch(91.6% 6% 82.1deg);
-  --paper:        oklch(97.7% 2.75% 84.6deg);
-  --ink:          oklch(25.1% 3.5% 163.6deg);
-  --ink-soft:     oklch(39.5% 5.25% 158.3deg);
-  --green:        oklch(38.2% 10.25% 166.3deg);
-  --green-soft:   oklch(46.8% 12% 166.3deg);
-  --tan:          oklch(78.9% 9% 78.6deg);
-  --tan-deep:     oklch(67.5% 11.5% 73.9deg);
-  --line:         oklch(25.1% 3.5% 163.6deg / 0.14);
-  --header-bg:    oklch(95.4% 3.25% 82.4deg / 0.86);
-  --map-bg:       oklch(95.4% 3.25% 82.4deg);
-  --shadow-soft:  oklch(25.1% 3.5% 163.6deg / 0.35);
+  // shadcn semantic tokens — light.
+  --background:            oklch(95.4% 0.0130 81.5deg);
+  --foreground:            oklch(25.6% 0.0136 163.7deg);
+  --card:                  oklch(97.6% 0.0099 86deg);
+  --card-foreground:       oklch(25.6% 0.0136 163.7deg);
+  // shadcn primitives (sonner, dialog…) resolve popover surfaces; we map them
+  // onto the card surface so they match the project's card treatment.
+  --popover:               oklch(97.6% 0.0099 86deg);
+  --popover-foreground:    oklch(25.6% 0.0136 163.7deg);
+  --primary:               oklch(38.1% 0.0427 165.9deg);
+  --primary-foreground:    oklch(97.7% 0.0118 86.1deg);
+  --secondary:             oklch(91.0% 0.0174 81.5deg);
+  --secondary-foreground:  oklch(38.1% 0.0427 165.9deg);
+  --muted:                 oklch(91.6% 0.0149 81.5deg);
+  --muted-foreground:      oklch(45.8% 0.0240 158.2deg);
+  --accent:                oklch(73.7% 0.0446 74.4deg);
+  --accent-foreground:     oklch(25.6% 0.0136 163.7deg);
+  --destructive:           oklch(58.5% 0.1793 34.9deg);
+  --border:                oklch(85.5% 0.0160 84.6deg);
+  --input:                 oklch(85.5% 0.0160 84.6deg);
+  --ring:                  oklch(38.1% 0.0427 165.9deg);
+  --radius:                0.625rem;
 
-  // Fixed tokens are only the ones the Kontakt SECTION needs to stay
-  // cream-on-green in both themes. The praxis card sitting inside the
-  // section is themed normally — paper in light, dark-paper in dark.
-  --green-fixed:    oklch(38.2% 10.25% 166.3deg);
-  --paper-fixed:    oklch(97.7% 2.75% 84.6deg);
-  --tan-fixed:      oklch(78.9% 9% 78.6deg);
+  // Fixed tokens — the Kontakt SECTION needs to stay cream-on-green in both
+  // themes. Identical in light and dark, so they are EXCLUDED from the theme
+  // transition (the `:is(...)` lists in `_base.scss` never name `*-fixed`
+  // utilities). The card sitting inside the section is themed normally.
+  --primary-fixed:         oklch(34.2% 0.0386 166.4deg);
+  --paper-fixed:           oklch(97.7% 0.0114 84.6deg);
+  --accent-fixed:          oklch(78.9% 0.0359 78.6deg);
+  --map-bg-fixed:          oklch(30.7% 0.0335 164.1deg);
 
-  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
-  --sans:  'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  // (Font families live in `@theme` in tailwind.css as `--font-serif` /
+  // `--font-sans`, which Tailwind emits to `:root` — consumed by Sass via
+  // those names and by JSX via `font-serif` / `font-sans` utilities.)
 
-  // Foreground colour for elements painted on `--green` (CTAs, nav phone pill).
-  // The swap keeps contrast on the green-becomes-sage flip in dark mode.
-  --on-primary: var(--paper);
-
-  // Image filter for the portrait. Dark mode dims a touch and pulls down
-  // saturation so the portrait doesn't read as a bright slab against the
-  // deep canvas background.
-  --portrait-filter: saturate(0.92) contrast(1.02);
-  --ueber-portrait-filter: saturate(0.85) contrast(1.02);
-
-  // Inline dot on the phone-CTA pill. Warm tan against dark green; flips to
-  // the dark canvas in dark mode where the pill turns light sage.
-  --cta-dot-bg: var(--tan);
-
-  // Motion timings. Two named tokens own every transition duration in the
-  // project — tune feel here, not at call sites. `--theme-transition` covers
-  // the dark/light colour crossfade plus UI hover/interaction feedback (burger
-  // morph, hover effects on themed and fixed-paper surfaces — same duration
-  // means everything settles together). `--reveal-duration` covers the
-  // scroll-reveal entrance.
+  // Theme/interaction timing. `--theme-transition` owns the dark/light colour
+  // crossfade plus UI hover/focus feedback (same duration means everything
+  // settles together). Scroll-reveal entrances are GSAP-driven, not CSS.
   --theme-transition: 200ms;
-  --reveal-duration: 700ms;
+
+  // Soft drop-shadow tint (oklch with baked-in alpha). Consumed by the
+  // `--shadow-card` / `--shadow-hover` tokens in `tailwind.css`; flips to a
+  // deeper value in dark so the lift reads on the dark surfaces.
+  --shadow-soft:  oklch(25.1% 0.0350 163.6deg / 0.35);
 
   color-scheme: light;
 }
@@ -79,24 +78,27 @@
 // Dark cascade — covers both `html.dark` (JS path) and the no-JS fallback
 // `@media (prefers-color-scheme: dark)` on unset html. See `_mixins.scss`.
 @include dark {
-  --bg:           oklch(23.0% 5% 167.0deg);
-  --paper:        oklch(27.8% 5.75% 162.7deg);
-  --ink:          oklch(92.3% 5.25% 85.9deg);
-  --ink-soft:     oklch(74.8% 5.5% 88.8deg);
-  --green:        oklch(79.5% 9.5% 160.4deg);
-  --green-soft:   oklch(70.2% 11% 160.4deg);
-  --tan:          oklch(78.9% 9% 78.6deg);
-  --tan-deep:     oklch(81.4% 12.25% 78.3deg);
-  --line:         oklch(92.3% 5.25% 85.9deg / 0.16);
-  --header-bg:    oklch(23.0% 5% 167.0deg / 0.88);
-  --map-bg:       oklch(25.2% 4.5% 165.4deg);
-  --shadow-soft:  oklch(0% 0% 0deg / 0.5);
-  --bg-deep:      oklch(25.5% 5% 162.9deg);
+  --background:            oklch(21.6% 0.0181 168deg);
+  --foreground:            oklch(92.1% 0.0203 86.1deg);
+  --card:                  oklch(27.1% 0.0215 162deg);
+  --card-foreground:       oklch(92.1% 0.0203 86.1deg);
+  --popover:               oklch(27.1% 0.0215 162deg);
+  --popover-foreground:    oklch(92.1% 0.0203 86.1deg);
+  --primary:               oklch(78.8% 0.0451 160.3deg);
+  --primary-foreground:    oklch(21.6% 0.0181 168deg);
+  --secondary:             oklch(31.1% 0.0179 163.5deg);
+  --secondary-foreground:  oklch(92.1% 0.0203 86.1deg);
+  --muted:                 oklch(28.9% 0.0162 163.6deg);
+  --muted-foreground:      oklch(74.9% 0.0238 89deg);
+  --accent:                oklch(69.0% 0.0486 74.3deg);
+  --accent-foreground:     oklch(21.6% 0.0181 168deg);
+  --destructive:           oklch(63.7% 0.1514 35.2deg);
+  --border:                oklch(37.0% 0.0172 163.9deg);
+  --input:                 oklch(37.0% 0.0172 163.9deg);
+  --ring:                  oklch(78.8% 0.0451 160.3deg);
 
-  --on-primary: var(--bg);
-  --portrait-filter: saturate(0.78) contrast(0.98) brightness(0.9);
-  --ueber-portrait-filter: saturate(0.72) contrast(0.96) brightness(0.88);
-  --cta-dot-bg: var(--bg);
+  // Deeper shadow tint so the card lift still reads on dark surfaces.
+  --shadow-soft:  oklch(0% 0 0deg / 0.5);
 
   color-scheme: dark;
 }

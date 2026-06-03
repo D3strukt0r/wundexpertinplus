@@ -39,19 +39,23 @@ html {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  // Solid header — drop the alpha from --header-bg so the sticky nav
-  // stops showing page content through it. Light = same hue as --map-bg
-  // (the already-solid sibling token); dark = the canvas --bg.
-  :root {
-    --header-bg: oklch(95.4% 3.25% 82.4deg);
+  // Opaque glass fallback. The sticky nav tints with `bg-background/85` over a
+  // backdrop blur; under reduced-transparency the blur is dropped (below) and
+  // the translucent surface falls back to its solid token so no page content
+  // shows through. The translucent Kontakt card surfaces and secondary tints
+  // are listed alongside. Per-surface bumps live with each component; this
+  // blanket guarantees the global default.
+  :is(.bg-background\/80, .bg-background\/85, .bg-background\/90) {
+    background-color: var(--background);
   }
 
-  // Dark override needs to win over the translucent declarations in
-  // _tokens.scss at equal specificity — the `dark` mixin emits the
-  // `html.dark` rule plus the no-JS `prefers-color-scheme: dark` fallback,
-  // and source order (this rule comes later) flips both to opaque.
-  @include dark {
-    --header-bg: oklch(23.0% 5% 167.0deg);
+  :is(.bg-card\/60, .bg-card\/70, .bg-card\/80, .bg-card\/90,
+      .bg-popover\/90) {
+    background-color: var(--card);
+  }
+
+  :is(.bg-secondary\/40, .bg-secondary\/60) {
+    background-color: var(--secondary);
   }
 
   // Disable backdrop blur everywhere. With a solid header behind it the
@@ -89,20 +93,20 @@ html {
 }
 
 body {
-  font-family: var(--sans);
-  color: var(--ink);
-  background: var(--bg);
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background: var(--background);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   // Body only transitions `background-color`. Putting `color` on body's
-  // transition makes every descendant with its own `color: var(--ink…)` +
+  // transition makes every descendant with its own `color: var(--foreground…)` +
   // a `color` transition stall — Chrome re-targets the descendant's
   // animation every frame against the body's animating inherited colour,
   // so the descendant transition trickles over ~2× the intended duration.
   // Color transitions are declared per element via the `text-*` per-utility
   // rule below; descendants without a themed `text-*` will snap (body's
-  // color is `var(--ink)`, which changes instantly).
+  // color is `var(--foreground)`, which changes instantly).
   transition: background-color var(--theme-transition) ease;
 }
 
@@ -112,8 +116,9 @@ body {
 // utility match no selector here and stay un-transitioned, so they inherit
 // smoothly from an animating ancestor without re-targeting each frame
 // (which was the sawtooth that motivated the earlier @property attempt).
-// `text-tan`, `text-green-fixed`, `text-paper-fixed`, `text-tan-fixed` are
-// excluded — those tokens don't change between themes.
+// The `*-fixed` utilities (`text-paper-fixed`, `bg-primary-fixed`,
+// `bg-map-bg-fixed`, `text-accent-fixed`, …) are excluded — those tokens are
+// identical in light and dark, so they must not animate on theme flip.
 //
 // SVG brand-mark fills get their own transition rule in `_brand.scss` next
 // to the literal `oklch(…)` declarations they animate. We intentionally do
@@ -125,15 +130,18 @@ body {
 @layer base {
   // Elements with ONLY a themed bg-* or border-* class (no text-*): just
   // transition bg + border, NOT color. Including `color` here would make
-  // these elements (e.g. a `<section class="bg-paper border-line">` that
-  // inherits its colour from body) run a 4s `color` animation triggered by
-  // body's snap, which then stalls any descendant `color` transitions via
-  // Chrome's per-frame retargeting.
-  :is(.bg-bg, .bg-bg-deep, .bg-paper, .bg-ink, .bg-ink-soft,
-      .bg-green, .bg-green-soft, .bg-tan-deep,
-      .bg-line, .bg-header, .bg-map, .bg-on-primary, .bg-cta-dot,
-      .border-bg, .border-bg-deep, .border-paper, .border-ink, .border-ink-soft,
-      .border-green, .border-green-soft, .border-tan-deep, .border-line) {
+  // these elements (e.g. a `<section class="bg-card border-border">` that
+  // inherits its colour from body) run a long `color` animation triggered
+  // by body's snap, which then stalls any descendant `color` transitions
+  // via Chrome's per-frame retargeting.
+  //
+  // Lists the shadcn utility class names actually painted by the redesign.
+  // The `*-fixed` utilities (bg-primary-fixed / text-paper-fixed /
+  // bg-map-bg-fixed / …) are deliberately ABSENT — those tokens are
+  // identical in both themes, so they must not animate on theme flip.
+  :is(.bg-background, .bg-card, .bg-popover, .bg-primary, .bg-secondary,
+      .bg-muted, .bg-accent, .bg-destructive,
+      .border-border, .border-input, .border-primary, .border-accent) {
     transition:
       background-color var(--theme-transition) ease,
       border-color     var(--theme-transition) ease;
@@ -142,10 +150,12 @@ body {
   // Elements with a themed text-* class: transition all three (color, bg,
   // border). This rule comes AFTER the :is() block above so for elements
   // with both `text-*` AND `bg-*`/`border-*` (e.g. Kontakt article's
-  // `bg-paper text-ink`), this wins and they get the full transition list.
-  .text-bg, .text-bg-deep, .text-paper, .text-ink, .text-ink-soft,
-  .text-green, .text-green-soft, .text-tan-deep,
-  .text-on-primary, .text-cta-dot {
+  // `bg-card text-foreground`), this wins and they get the full transition
+  // list. `*-fixed` text utilities are excluded (tokens don't change).
+  .text-foreground, .text-card-foreground, .text-popover-foreground,
+  .text-primary, .text-primary-foreground,
+  .text-secondary-foreground, .text-muted-foreground,
+  .text-accent, .text-accent-foreground, .text-destructive {
     transition:
       color            var(--theme-transition) ease,
       background-color var(--theme-transition) ease,
@@ -160,14 +170,14 @@ body {
   // parent's transitioning `color`, so Chrome doesn't retarget. (Keyword
   // `currentColor` doesn't trigger transitions, so reference the variable
   // directly.) Add a new rule below for each combination of element + token.
-  // `[&_em]:text-tan-fixed` (Kontakt) is a fixed token that doesn't change,
-  // so it doesn't need a rule.
-  [class*="[&_em]:text-green"] em {
-    -webkit-text-fill-color: var(--green);
+  // `[&_em]:text-accent-fixed` (Kontakt heading) is a fixed token that doesn't
+  // change between themes, so it deliberately gets no rule here.
+  [class*="[&_em]:text-primary"] em {
+    -webkit-text-fill-color: var(--primary);
     transition: -webkit-text-fill-color var(--theme-transition) ease;
   }
-  [class*="[&_strong]:text-ink"] strong {
-    -webkit-text-fill-color: var(--ink);
+  [class*="[&_strong]:text-foreground"] strong {
+    -webkit-text-fill-color: var(--foreground);
     transition: -webkit-text-fill-color var(--theme-transition) ease;
   }
 }
