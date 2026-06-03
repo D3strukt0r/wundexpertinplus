@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0](https://github.com/Team-MaRo/wundexpertinplus/compare/2.2.1...2.3.0) (2026-06-03)
+
+
+### ✨ Features
+
+* add Cloudflare Workers SSR as a third deploy target ([dfeee2e](https://github.com/Team-MaRo/wundexpertinplus/commit/dfeee2e0c20c31ddd9776face31c6195f1550909))
+* Dynamic SEO in SSR and build in SPA & favicon endpoints for Dev mode ([61c07bd](https://github.com/Team-MaRo/wundexpertinplus/commit/61c07bdd392835abb44bc93cd24c086d09099dae))
+* Rebuild new UI with schadcn & gsap ([40edb79](https://github.com/Team-MaRo/wundexpertinplus/commit/40edb79e59f6efa6476ad780c2f6a4a21d065e4d))
+* Use standard tokens and rem instead of px ([ce44d00](https://github.com/Team-MaRo/wundexpertinplus/commit/ce44d00254e5e0e60291e5c087278be816dc6a08))
+
+
+### 🐛 Bug Fixes
+
+* Design issues & pnpm deps ([22a0eaa](https://github.com/Team-MaRo/wundexpertinplus/commit/22a0eaacc8b2a17c19d950d29caae5e216784e5d))
+* Small text sizes & update deps ([d33f463](https://github.com/Team-MaRo/wundexpertinplus/commit/d33f463444a02e882ce5e3816fd78396d0104430))
+
 ## [2.2.1](https://github.com/D3strukt0r/wundexpertinplus/compare/2.2.0...2.2.1) (2026-05-26)
 
 
