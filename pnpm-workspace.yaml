@@ -15,6 +15,7 @@ minimumReleaseAgeExclude:
   - '@cloudflare/vite-plugin@1.39.2'
   - miniflare@4.20260601.0
   - wrangler@4.97.0
+  - i18next@26.3.1
 
 # Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
 # pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
