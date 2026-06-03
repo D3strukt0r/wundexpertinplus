@@ -125,6 +125,8 @@ footer:
 errors:
   generic_title: 'Etwas ist schiefgelaufen'
   unknown: 'Unbekannter Fehler'
+  not_found_title: '404'
+  not_found_message: 'Die angeforderte Seite konnte nicht gefunden werden.'
 
 not_found:
   title: '404'

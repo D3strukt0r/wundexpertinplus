@@ -105,10 +105,25 @@ export default function App() {
 
 export function ErrorBoundary({error}: Route.ErrorBoundaryProps) {
   const {t} = useTranslation();
-  const message = isRouteErrorResponse(error)
-    ? `${error.status} ${error.statusText}`
-    : error instanceof Error
-      ? error.message
-      : t('errors.unknown');
-  return <FallbackLayout title={t('errors.generic_title')} message={message} />;
+
+  let title = t('errors.generic_title');
+  let message = t('errors.unknown');
+  // Stack trace is rendered in development only — the prod bundle ships no
+  // internal error details to the visitor.
+  let stack: string | undefined;
+
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 404) {
+      title = t('errors.not_found_title');
+      message = t('errors.not_found_message');
+    } else {
+      title = t('errors.generic_title');
+      message = error.statusText !== '' ? error.statusText : `${error.status}`;
+    }
+  } else if (import.meta.env.DEV && error instanceof Error) {
+    message = error.message;
+    stack = error.stack;
+  }
+
+  return <FallbackLayout title={title} message={message} stack={stack} />;
 }

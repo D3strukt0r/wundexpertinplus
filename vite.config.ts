@@ -1,5 +1,6 @@
 import {join} from 'node:path';
 import process from 'node:process';
+import {cloudflare} from '@cloudflare/vite-plugin';
 import ViteYaml from '@modyfi/vite-plugin-yaml';
 import {reactRouter} from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
@@ -21,6 +22,10 @@ const isVitest = process.env.VITEST === 'true';
 // SSR serves the SEO artifacts as runtime resource routes; only the SPA
 // (GitHub Pages) build emits them as static files (host known at build time).
 const isSpa = process.env.SSR === 'false';
+// Third deploy target: Cloudflare Workers SSR. Gated on CLOUDFLARE=true so the
+// GitHub-Pages SPA and the Node/Nix Docker SSR builds are untouched. The
+// plugin clashes with vitest's environment, so skip it under VITEST too.
+const isCloudflare = process.env.CLOUDFLARE === 'true';
 
 // Deployed hostname for the SPA build's static SEO files. CI's
 // deploy-gh-pages.yml passes it as SITE_HOST (from the Pages custom domain);
@@ -32,6 +37,12 @@ const SITE_URL = `https://${SITE_HOST}`;
 
 export default defineConfig({
   plugins: [
+    // Cloudflare Workers SSR target (CLOUDFLARE=true). Must come first so it can wrap
+    // the dev/build pipeline before reactRouter() runs.
+    ...(isCloudflare && !isVitest
+      ? [
+          cloudflare({viteEnvironment: {name: 'ssr'}})]
+      : []),
     tailwindcss(),
     // Pulls year(s) + holder from LICENSE.txt and exposes them as
     // build-time globals (__COPYRIGHT_YEARS__, __COPYRIGHT_HOLDER__) so

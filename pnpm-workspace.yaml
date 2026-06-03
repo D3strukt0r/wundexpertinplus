@@ -3,11 +3,18 @@ allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
   sharp: true
+  # workerd ships prebuilt binaries; its optional postinstall build script is
+  # not needed for `wrangler types` / `wrangler deploy`, so keep it off (also
+  # avoids running a native build in the Nix pnpm.fetchDeps closure).
+  workerd: false
 
 minimumReleaseAgeExclude:
   - '@types/react@19.2.16'
   - react-dom@19.2.7
   - react@19.2.7
+  - '@cloudflare/vite-plugin@1.39.2'
+  - miniflare@4.20260601.0
+  - wrangler@4.97.0
 
 # Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
 # pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
