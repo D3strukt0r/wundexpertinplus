@@ -34,7 +34,7 @@
         let
           wundexpertinplus = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "wundexpertinplus";
-            version = "2.3.0"; # x-release-please-version
+            version = "2.3.1"; # x-release-please-version
             src = ./.;
 
             nativeBuildInputs = [
