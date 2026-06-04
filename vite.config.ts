@@ -28,14 +28,29 @@ const isSpa = process.env.SSR === 'false';
 const isCloudflare = process.env.CLOUDFLARE === 'true';
 
 // Deployed hostname for the SPA build's static SEO files. CI's
-// deploy-gh-pages.yml passes it as SITE_HOST (from the Pages custom domain);
-// local dev falls back to localhost. The SSR image ignores this and resolves
-// the host per request (app/lib/site-url.ts).
+// deploy-gh-pages.yml derives SITE_HOST from the Pages API — the custom domain
+// when set, else the github.io host (paired with BASE_PATH below for the
+// project sub-path). Local dev falls back to localhost. The SSR image ignores
+// this and resolves the host per request (app/lib/site-url.ts).
 const trimmedHost = process.env.SITE_HOST?.trim();
 const SITE_HOST = trimmedHost === undefined || trimmedHost === '' ? 'localhost' : trimmedHost;
-const SITE_URL = `https://${SITE_HOST}`;
+// Deployment base path. deploy-gh-pages.yml sets BASE_PATH from the Pages URL:
+// `/` for a custom domain (root), `/<repo>/` for a project sub-path. Unset for
+// the Cloudflare/Docker SSR builds → root.
+const rawBase = process.env.BASE_PATH?.trim();
+const BASE_PATH = rawBase === undefined || rawBase === '' || rawBase === '/'
+  ? '/'
+  : `/${rawBase.replace(/^\/+|\/+$/g, '')}/`;
+const BASE_NO_SLASH = BASE_PATH === '/' ? '' : BASE_PATH.replace(/\/$/, ''); // '' or '/<repo>'
+const ORIGIN = `https://${SITE_HOST}`;
+// Canonical URL incl. sub-path — for robots.txt (it concatenates it).
+const SITE_URL = `${ORIGIN}${BASE_NO_SLASH}`;
+// Sitemap gets origin + sub-path-prefixed paths (its SitemapStream resolves a
+// root-absolute path against the origin and would drop the sub-path otherwise).
+const sitemapPaths = ['/'].map((p) => `${BASE_NO_SLASH}${p}`);
 
 export default defineConfig({
+  base: BASE_PATH,
   plugins: [
     // Cloudflare Workers SSR target (CLOUDFLARE=true). Must come first so it can wrap
     // the dev/build pipeline before reactRouter() runs.
@@ -68,6 +83,7 @@ export default defineConfig({
     // `faviconRasters`; sources the text fields from the locale YAML's
     // `brand.*` so a single edit in `de.yml` propagates to the PWA listing.
     webManifest({
+      base: BASE_PATH,
       locale: join('app', 'locales', 'de.yml'),
       out: 'site.webmanifest',
       keys: {name: 'brand.name', short_name: 'brand.short_name', description: 'brand.description'},
@@ -86,7 +102,7 @@ export default defineConfig({
     // routes, resolving the host per request).
     ...(isSpa
       ? [
-          sitemap({siteUrl: SITE_URL, paths: ['/']}),
+          sitemap({siteUrl: ORIGIN, paths: sitemapPaths}),
           robots({siteUrl: SITE_URL}),
         ]
       : []),

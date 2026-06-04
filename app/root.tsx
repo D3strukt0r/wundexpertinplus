@@ -28,23 +28,29 @@ function ScrollToHash() {
   return null;
 }
 
-export const links: Route.LinksFunction = () => [
-  {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
-  {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
-  {
-    rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap',
-  },
-  // Favicon set. The SVG carries both light + dark variants inline via a
-  // `prefers-color-scheme` `@media` block in its own <style> element, so a
-  // single `<link rel="icon">` covers both. PNG + ICO are fallbacks for
-  // browsers without SVG-favicon support.
-  {rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg'},
-  {rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png'},
-  {rel: 'shortcut icon', href: '/favicon.ico'},
-  {rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png'},
-  {rel: 'manifest', href: '/site.webmanifest'},
-];
+export const links: Route.LinksFunction = () => {
+  // Vite's base (ends in `/`): `/` for the root-served Cloudflare/Docker builds,
+  // `/<repo>/` for the GitHub Pages sub-path build. Prefix every same-origin
+  // asset href with it so they resolve under a project sub-path.
+  const base = import.meta.env.BASE_URL;
+  return [
+    {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+    {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap',
+    },
+    // Favicon set. The SVG carries both light + dark variants inline via a
+    // `prefers-color-scheme` `@media` block in its own <style> element, so a
+    // single `<link rel="icon">` covers both. PNG + ICO are fallbacks for
+    // browsers without SVG-favicon support.
+    {rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: `${base}favicon.svg`},
+    {rel: 'icon', type: 'image/png', sizes: '96x96', href: `${base}favicon-96x96.png`},
+    {rel: 'shortcut icon', href: `${base}favicon.ico`},
+    {rel: 'apple-touch-icon', sizes: '180x180', href: `${base}apple-touch-icon.png`},
+    {rel: 'manifest', href: `${base}site.webmanifest`},
+  ];
+};
 
 // Runs in <head> before stylesheets evaluate. Writes to <html>
 // (`document.documentElement`) because <body> doesn't exist yet during head
