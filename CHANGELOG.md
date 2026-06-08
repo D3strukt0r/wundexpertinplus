@@ -28,49 +28,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Design issues & pnpm deps ([22a0eaa](https://github.com/Team-MaRo/wundexpertinplus/commit/22a0eaacc8b2a17c19d950d29caae5e216784e5d))
 * Small text sizes & update deps ([d33f463](https://github.com/Team-MaRo/wundexpertinplus/commit/d33f463444a02e882ce5e3816fd78396d0104430))
 
-## [2.2.1](https://github.com/D3strukt0r/wundexpertinplus/compare/2.2.0...2.2.1) (2026-05-26)
+## [2.2.1](https://github.com/Team-MaRo/wundexpertinplus/compare/2.2.0...2.2.1) (2026-05-26)
 
 
 ### 🐛 Bug Fixes
 
-* **a11y:** Close no-JS dark cascade gap under prefers-reduced-transparency ([4cf6ca6](https://github.com/D3strukt0r/wundexpertinplus/commit/4cf6ca6e194f3846191572a4105cc50720cacd52))
-* **build:** Serve site.webmanifest from vite dev server ([6382742](https://github.com/D3strukt0r/wundexpertinplus/commit/63827423c7246bd357b8e30ee45ab7caf70a7d03))
-* **styles:** Make theme crossfade correct at any duration ([2f0a0db](https://github.com/D3strukt0r/wundexpertinplus/commit/2f0a0db452f1333b36a886feb0a0c54862717398))
-* **workflows:** Use GH_PAT for Dependabot auto-merge to fire downstream workflows ([e653a3c](https://github.com/D3strukt0r/wundexpertinplus/commit/e653a3c7195bf49c119ba22345e2110614e54194))
+* **a11y:** Close no-JS dark cascade gap under prefers-reduced-transparency ([4cf6ca6](https://github.com/Team-MaRo/wundexpertinplus/commit/4cf6ca6e194f3846191572a4105cc50720cacd52))
+* **build:** Serve site.webmanifest from vite dev server ([6382742](https://github.com/Team-MaRo/wundexpertinplus/commit/63827423c7246bd357b8e30ee45ab7caf70a7d03))
+* **styles:** Make theme crossfade correct at any duration ([2f0a0db](https://github.com/Team-MaRo/wundexpertinplus/commit/2f0a0db452f1333b36a886feb0a0c54862717398))
+* **workflows:** Use GH_PAT for Dependabot auto-merge to fire downstream workflows ([e653a3c](https://github.com/Team-MaRo/wundexpertinplus/commit/e653a3c7195bf49c119ba22345e2110614e54194))
 
 
 ### ♻️ Refactoring
 
-* **maps:** Switch to [@vis](https://github.com/vis).gl/react-google-maps ([bd7067c](https://github.com/D3strukt0r/wundexpertinplus/commit/bd7067c125e7978342fef60fa24e2a3be9eb79bd))
-* **styles:** Centralise motion + dark-cascade tokens ([87ff861](https://github.com/D3strukt0r/wundexpertinplus/commit/87ff8616945c1cf70752b8ce89c6831a8467c4fc))
+* **maps:** Switch to [@vis](https://github.com/vis).gl/react-google-maps ([bd7067c](https://github.com/Team-MaRo/wundexpertinplus/commit/bd7067c125e7978342fef60fa24e2a3be9eb79bd))
+* **styles:** Centralise motion + dark-cascade tokens ([87ff861](https://github.com/Team-MaRo/wundexpertinplus/commit/87ff8616945c1cf70752b8ce89c6831a8467c4fc))
 
-## [2.2.0](https://github.com/D3strukt0r/wundexpertinplus/compare/2.1.0...2.2.0) (2026-05-20)
+## [2.2.0](https://github.com/Team-MaRo/wundexpertinplus/compare/2.1.0...2.2.0) (2026-05-20)
 
 
 ### ✨ Features
 
-* **build:** Create SPA fallback 404.html for static hosts ([4ae3954](https://github.com/D3strukt0r/wundexpertinplus/commit/4ae3954264e3080b7ddb1bcf64038cb9d6817524))
-* **theme:** Synchronize browser chrome color with app theme ([e10b84e](https://github.com/D3strukt0r/wundexpertinplus/commit/e10b84e0839f978b7e8e4e077980a3bf14f649c5))
+* **build:** Create SPA fallback 404.html for static hosts ([4ae3954](https://github.com/Team-MaRo/wundexpertinplus/commit/4ae3954264e3080b7ddb1bcf64038cb9d6817524))
+* **theme:** Synchronize browser chrome color with app theme ([e10b84e](https://github.com/Team-MaRo/wundexpertinplus/commit/e10b84e0839f978b7e8e4e077980a3bf14f649c5))
 
 
 ### ⚡ Performance
 
-* **theme:** Apply theme and JS classes on  to prevent FOUC ([256f423](https://github.com/D3strukt0r/wundexpertinplus/commit/256f4231f3a8fa8874dbc0b89a9ab7ebd35bc356))
+* **theme:** Apply theme and JS classes on  to prevent FOUC ([256f423](https://github.com/Team-MaRo/wundexpertinplus/commit/256f4231f3a8fa8874dbc0b89a9ab7ebd35bc356))
 
 
 ### ♻️ Refactoring
 
-* **colors:** Standardize oklch chroma to percentage syntax ([a3205ac](https://github.com/D3strukt0r/wundexpertinplus/commit/a3205ac4a4dbf94e9a8955beb90162569c4bacbe))
-* **scripts:** Relocate pnpm hash bump script ([81593eb](https://github.com/D3strukt0r/wundexpertinplus/commit/81593ebf295ae569cfd31a42b7e0fee3c3f66da0))
+* **colors:** Standardize oklch chroma to percentage syntax ([a3205ac](https://github.com/Team-MaRo/wundexpertinplus/commit/a3205ac4a4dbf94e9a8955beb90162569c4bacbe))
+* **scripts:** Relocate pnpm hash bump script ([81593eb](https://github.com/Team-MaRo/wundexpertinplus/commit/81593ebf295ae569cfd31a42b7e0fee3c3f66da0))
 
-## [2.1.0](https://github.com/D3strukt0r/wundexpertinplus/compare/2.0.0...2.1.0) (2026-05-20)
+## [2.1.0](https://github.com/Team-MaRo/wundexpertinplus/compare/2.0.0...2.1.0) (2026-05-20)
 
 
 ### ✨ Features
 
-* **build:** dynamically configure site hostname and PWA assets ([41bd224](https://github.com/D3strukt0r/wundexpertinplus/commit/41bd224b5deeabf2aa073e4f6d594a20c6145f95))
+* **build:** dynamically configure site hostname and PWA assets ([41bd224](https://github.com/Team-MaRo/wundexpertinplus/commit/41bd224b5deeabf2aa073e4f6d594a20c6145f95))
 
-## [2.0.0](https://github.com/D3strukt0r/wundexpertinplus/compare/1.0.1...2.0.0) (2026-05-20)
+## [2.0.0](https://github.com/Team-MaRo/wundexpertinplus/compare/1.0.1...2.0.0) (2026-05-20)
 
 
 ### ⚠ BREAKING CHANGES
@@ -79,26 +79,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
-* rebuild site as React Router 7 SPA/SSR ([d82bc82](https://github.com/D3strukt0r/wundexpertinplus/commit/d82bc827fb40cdd753588bc222f73bc51b33d316))
+* rebuild site as React Router 7 SPA/SSR ([d82bc82](https://github.com/Team-MaRo/wundexpertinplus/commit/d82bc827fb40cdd753588bc222f73bc51b33d316))
 
 ## 1.0.1 (2020-05-29)
 
 
 ### ✨ Features
 
-* Set upload limit to 100M for WordPress uploads (`post_max_size` and `upload_max_filesize`) ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Set upload limit to 100M for WordPress uploads (`post_max_size` and `upload_max_filesize`) ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
 
 
 ### 🐛 Bug Fixes
 
-* Move trailing inline comments off `.gitattributes` rule lines so the rules apply correctly ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Move trailing inline comments off `.gitattributes` rule lines so the rules apply correctly ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
 
 ## 1.0.0 (2020-05-29)
 
 
 ### ✨ Features
 
-* Initial project scaffolding (Docker, Vagrant, CI, governance files) ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
-* Add WordPress ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
-* Add site-specific plugins and themes ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
-* Update WordPress ([728850e](https://github.com/D3strukt0r/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Initial project scaffolding (Docker, Vagrant, CI, governance files) ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Add WordPress ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Add site-specific plugins and themes ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))
+* Update WordPress ([728850e](https://github.com/Team-MaRo/wundexpertinplus/commit/728850ece62730f3a0ef45edfe0752604e4d721b))

@@ -8,7 +8,7 @@
 
     # Shared scripts + lib helpers. `follows` keeps a duplicate nixpkgs out
     # of flake.lock.
-    nix-utils.url = "github:d3strukt0r/nix-utils";
+    nix-utils.url = "github:Team-MaRo/nix-utils";
     nix-utils.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -45,7 +45,7 @@
             pnpmDeps = pkgs.pnpm_10.fetchDeps {
               inherit (finalAttrs) pname version src;
               fetcherVersion = 2;
-              hash = "sha256-OZrylVNUJ/riN1HJytmJmIuvQOyA7zllMQ/Zp5MEgzs=";
+              hash = "sha256-pHzh7rvlWJSX1vIrJJ5eJqhFlHO9geTn1jf62CQBPV0=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
