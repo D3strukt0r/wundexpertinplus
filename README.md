@@ -2,15 +2,15 @@
 
 One-page website for Sibylle Bürgi-Lütscher — Dipl. Wundexpertin SAfW, Liestal.
 
-[![License](https://img.shields.io/github/license/d3strukt0r/wundexpertinplus?label=License)](LICENSE.txt)
+[![License](https://img.shields.io/github/license/Team-MaRo/wundexpertinplus?label=License)](LICENSE.txt)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa)][code-of-conduct]
 [![Docker Stars](https://img.shields.io/docker/stars/d3strukt0r/wundexpertinplus)][docker]
 [![Docker Pulls](https://img.shields.io/docker/pulls/d3strukt0r/wundexpertinplus)][docker]
 [![Codacy grade](https://img.shields.io/codacy/grade/a7d3a41ddccf4662880b35ae48f67454/master)](https://www.codacy.com/manual/D3strukt0r/wundexpertinplus)
 
-[![CI](https://github.com/D3strukt0r/wundexpertinplus/actions/workflows/ci.yml/badge.svg)][gh-action]
-[![Pages](https://github.com/D3strukt0r/wundexpertinplus/actions/workflows/deploy-gh-pages.yml/badge.svg)][gh-action]
-[![Docker](https://github.com/D3strukt0r/wundexpertinplus/actions/workflows/docker.yml/badge.svg)][gh-action]
+[![CI](https://github.com/Team-MaRo/wundexpertinplus/actions/workflows/ci.yml/badge.svg)][gh-action]
+[![Pages](https://github.com/Team-MaRo/wundexpertinplus/actions/workflows/deploy-gh-pages.yml/badge.svg)][gh-action]
+[![Docker](https://github.com/Team-MaRo/wundexpertinplus/actions/workflows/docker.yml/badge.svg)][gh-action]
 
 ## Stack
 
@@ -102,8 +102,8 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 This project currently uses no third-party libraries or copied code.
 
 [docker]: https://hub.docker.com/repository/docker/d3strukt0r/wundexpertinplus
-[gh-action]: https://github.com/D3strukt0r/wundexpertinplus/actions
-[gh-tags]: https://github.com/D3strukt0r/wundexpertinplus/tags
-[gh-contributors]: https://github.com/D3strukt0r/wundexpertinplus/contributors
-[contributing]: https://github.com/D3strukt0r/.github/blob/master/CONTRIBUTING.md
-[code-of-conduct]: https://github.com/D3strukt0r/.github/blob/master/CODE_OF_CONDUCT.md
+[gh-action]: https://github.com/Team-MaRo/wundexpertinplus/actions
+[gh-tags]: https://github.com/Team-MaRo/wundexpertinplus/tags
+[gh-contributors]: https://github.com/Team-MaRo/wundexpertinplus/contributors
+[contributing]: https://github.com/Team-MaRo/.github/blob/master/CONTRIBUTING.md
+[code-of-conduct]: https://github.com/Team-MaRo/.github/blob/master/CODE_OF_CONDUCT.md

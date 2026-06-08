@@ -8,7 +8,7 @@
 
     # Shared scripts + lib helpers. `follows` keeps a duplicate nixpkgs out
     # of flake.lock.
-    nix-utils.url = "github:d3strukt0r/nix-utils";
+    nix-utils.url = "github:Team-MaRo/nix-utils";
     nix-utils.inputs.nixpkgs.follows = "nixpkgs";
   };
 
