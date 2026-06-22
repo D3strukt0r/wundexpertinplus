@@ -48,7 +48,7 @@
     "@iwf-web/eslint-coding-standard": "^1.1.0",
     "@iwf-web/tsconfig": "^1.1.0",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
-    "@react-router/dev": "^7.17.0",
+    "@react-router/dev": "^8.0.1",
     "@tailwindcss/vite": "^4.3.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
