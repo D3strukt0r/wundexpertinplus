@@ -8,14 +8,10 @@ allowBuilds:
   # avoids running a native build in the Nix pnpm.fetchDeps closure).
   workerd: false
 
-# Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
-# pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
-# ships a release on the patched version.
 overrides:
   # GHSA path-traversal in the dev server (esbuild >= 0.27.3 < 0.28.1); pulled
   # transitively at 0.27.3/0.27.7. Force the patched release.
   esbuild: '>=0.28.1'
-  js-yaml: '>=4.1.1'
 
 # `@iwf-web/tsconfig/react-strict/tsconfig.json` extends three @tsconfig/*
 # bases. tsc follows the @iwf-web/tsconfig symlink and resolves them inside

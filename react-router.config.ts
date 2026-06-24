@@ -16,13 +16,4 @@ export default {
   // Matches Vite's `base` (set from BASE_PATH) so routing works under a project
   // sub-path; '/' for the root-served Cloudflare/Docker builds.
   basename: BASENAME,
-  // Opt into the React Router v8 behaviours early (silences the build-log
-  // future-flag warnings and de-risks the eventual v8 bump).
-  future: {
-    v8_middleware: true,
-    v8_splitRouteModules: true,
-    v8_viteEnvironmentApi: true,
-    v8_passThroughRequests: true,
-    v8_trailingSlashAwareDataRequests: true,
-  },
 } satisfies Config;
