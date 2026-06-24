@@ -1,7 +1,6 @@
 import {join} from 'node:path';
 import process from 'node:process';
 import {cloudflare} from '@cloudflare/vite-plugin';
-import ViteYaml from '@modyfi/vite-plugin-yaml';
 import {reactRouter} from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
 import svgr from 'vite-plugin-svgr';
@@ -12,6 +11,7 @@ import {robots} from './app/vite/plugins/robots';
 import {sitemap} from './app/vite/plugins/sitemap';
 import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {webManifest} from './app/vite/plugins/web-manifest';
+import {yaml} from './app/vite/plugins/yaml';
 
 const WEB_MANIFEST_ICONS = [
   {size: 192, out: 'web-app-manifest-192x192.png', purpose: 'maskable'},
@@ -95,7 +95,7 @@ export default defineConfig({
     // react-router's vite plugin clashes with vitest's environment setup, so
     // skip it when running tests.
     ...(isVitest ? [] : [reactRouter()]),
-    ViteYaml(),
+    yaml(),
     svgr({include: '**/*.svg?react'}),
     // sitemap.xml / robots.txt as static files — SPA build only, each via its
     // own plugin's render fn (the SSR image serves the same through resource
