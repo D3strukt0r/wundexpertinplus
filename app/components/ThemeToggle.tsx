@@ -45,7 +45,7 @@ export function ThemeToggle({size = 'md'}: Props) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect -- SSR-hydration marker: must fire only on the client after mount, so aria-pressed stays absent during SSR
+    // eslint-disable-next-line react/set-state-in-effect -- SSR-hydration marker: must fire only on the client after mount, so aria-pressed stays absent during SSR
     setMounted(true);
   }, []);
 

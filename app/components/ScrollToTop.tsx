@@ -34,7 +34,7 @@ export function ScrollToTop() {
 
   useEffect(() => {
     const onScroll = () => {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect -- runs on every scroll event AND once on mount to read scrollY (which SSR can't know); no other way to sync initial state
+      // eslint-disable-next-line react/set-state-in-effect -- runs on every scroll event AND once on mount to read scrollY (which SSR can't know); no other way to sync initial state
       setVisible(window.scrollY > SCROLL_THRESHOLD_PX);
     };
     onScroll();
